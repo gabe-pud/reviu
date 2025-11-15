@@ -2,5 +2,8 @@
   "dependencies": {
     "@tailwindcss/cli": "^4.1.17",
     "tailwindcss": "^4.1.17"
+  },
+  "scripts": {
+    "css:watch": "npx @tailwindcss/cli -i ./reviu/static/src/input.css -o ./reviu/static/src/output.css --watch"
   }
 }
