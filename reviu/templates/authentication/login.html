@@ -1,20 +1,25 @@
 {% extends "base.html" %}
+{% load static %}
 
 {% block title %}Login - Reviu{% endblock title %}
 
-
-
-
-
 {% block body %}
-{% comment %} ========= {% endcomment %}
 
-<div class="bg-[#003554] min-h-screen flex items-center justify-center ">
+<div class="bg-[#003554] min-h-screen flex items-center justify-center">
 
+    <!-- Section que contém tudo -->
+    <section class="relative">
+        
+        <!-- 1. Corpo do elefante (z-0) -->
+        <div class="absolute -top-20 left-1/2 transform -translate-x-1/2 z-0">
+            <img src="{%  static 'resouces/decoCorpo.svg' %}" alt="Elephant" class="w-56">
+        </div>
+        
+        <!-- 2. Área de cadastro (z-10) -->
+        <div class="z-10 relative">
+            <form method="post" class="bg-gradient-to-b from-[#045685] to-[#003554] rounded-3xl p-8 pt-24 pb-8 w-96 shadow-2xl">
 
-<form method="post" class="bg-gradient-to-b from-[#045685] to-[#003554] rounded-lg p-8 w-96">
-
-    <h1 class="text-[#FFFFFF] text-2xl font-bold mb-6">Welcome Back!</h1>
+    <h1 class="text-[#FFFFFF] text-2xl font-bold mb-6 text-center" >Welcome Back!</h1>
 
     {% csrf_token %}
 
@@ -23,14 +28,18 @@
     <div class="relative">
         
         <div class="absolute inset-y-0 left-0 pl-4 flex items-center pointer-events-none">
+
             <svg class="w-5 h-5 text-gray-300" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+
                 <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" 
                       d="M3 8l7.89 5.26a2 2 0 002.22 0L21 8M5 19h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v10a2 2 0 002 2z"/>
             </svg>
         </div>
+
         <input type="text" id="email" name="email" required 
                placeholder="yourname@gmail.com"
-               class="w-full pl-12 pr-4 py-3 bg-[#5A8AAA] bg-opacity-40 text-white placeholder-gray-300 border-none rounded-full focus:outline-none focus:ring-2 focus:ring-blue-400">
+               class="w-full pl-12 pr-4 py-2 bg-[#5A8AAA] bg-opacity-40 text-white placeholder-gray-300 border-none rounded-full focus:outline-none focus:ring-2 focus:ring-blue-400 "
+               >
     </div>
 </div>
 
@@ -47,10 +56,12 @@
         <!-- Input com padding à esquerda para dar espaço ao ícone -->
         <input type="password" id="password" name="password" required 
                placeholder="••••••••"
-               class="w-full pl-12 pr-4 py-3 bg-[#5A8AAA] bg-opacity-40 text-white placeholder-gray-300 border-none rounded-full focus:outline-none focus:ring-2 focus:ring-blue-400 ">
+               class="w-full pl-12 pr-4 py-2 bg-[#5A8AAA] bg-opacity-40 text-white placeholder-gray-300 border-none rounded-full focus:outline-none focus:ring-2 focus:ring-blue-400 ">
     </div>
 </div>
-<button type="submit" class="bg-[#FE9A09] text-white text-2xl font-bold mb-6 px-6 py-2 rounded-full justify-center">Sign Up</button>
+<div class="flex justify-center mt-2">
+    <button type="submit" class="w-full bg-[#FE9A09] hover:bg-[#E68A00] text-[#12130F] text-xl font-semibold py-2 rounded-full transition duration-300 shadow-lg">Sign Up</button>
+</div>
 
 </div>
 
