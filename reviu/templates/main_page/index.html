@@ -1,0 +1,165 @@
+{% extends "base.html" %}
+{% load static %}
+
+{% block title %}reviu - home{% endblock title %}
+
+{% block body %}
+<section class="h-screen flex grow bg-[#ffffff]">
+        <nav id="main-nav" class="absolute flex justify-between px-16 pb-4 w-full bottom-0 z-20 bg-[#003554]
+        md:static md:left-0 md:bottom-auto md:flex-col md:pr-4 md:pl-2 md:py-16 md:w-fit md:justify-start md:gap-5">
+            <!-- fundo móvel atrás do botão (posicionado via JS) -->
+            <img id="nav-bg" class="absolute left-9 -top-[33.5px] w-28 pointer-events-none transition-all duration-300 ease-in-out z-10
+            md:rotate-90 md:left-4.75 md:top-13.5" src="{% static 'resouces/nav-button-bg.svg' %}" alt="">
+    
+            <a href="#" class="nav-btn size-14 p-3 rounded-full transition-transform duration-300 ease-in-out z-30 -translate-y-[29px] md:translate-y-0 md:translate-x-11" role="button" aria-current="page">
+                <img src="{% static 'resouces/home.svg' %}" alt="Home">
+            </a>
+            <a href="#" class="nav-btn size-14 p-3 rounded-full transition-transform duration-300 ease-in-out z-30" role="button">
+                <img src="{% static 'resouces/cards.svg' %}" alt="Cards">
+            </a>
+            <a href="#" class="nav-btn size-14 p-3 rounded-full transition-transform duration-300 ease-in-out z-30" role="button">
+                <img src="{% static 'resouces/user.svg' %}" alt="User">
+            </a>
+        </nav>
+        <div class="absolute right-0 top-0 pointer-events-none z-0">
+            <img src="{% static 'resouces/decko.svg' %}" alt="">
+        </div>
+        <main class="w-full md:ml-8 flex flex-col z-10">
+            <div class="flex flex-col grow max-h-168">
+                <div class="mt-8 mb-24 flex-none">
+                    <p class="text-3xl ml-3 text-[#013756]">Bem Vindo,</p>
+                    {% comment %} alterar para exibir nome do usuário logado {% endcomment %}
+                    <p class="text-3xl ml-3 text-[#013756] font-bold">Levi Ferreira</p>
+                </div>
+                <div class="mb-4 flex-none">
+                    {% comment %} alterar para exibir cartas pendentes do usuário {% endcomment %}
+                    <p class="text-2xl ml-3 text-[#013756]">32 cartas para revisar</p>
+                </div>
+                {% comment %} alterar para exibir decks do usuário {% endcomment %}
+                <div id="card-select" class="w-full grow px-3 mb-3 flex gap-3 overflow-x-scroll snap-x not-md:scrollbar-hidden">
+                    <div id="card" class="h-full aspect-2/3 bg-[#FE9A09] rounded-3xl p-6 flex flex-col justify-between snap-center">
+                        <div class="flex justify-between">
+                            <p class="text-3xl text-[#013756] font-bold">teste</p>
+                            <div class="flex items-center">
+                                <p class="text-xl text-[#013756]">100 cartas</p>
+                            </div>
+                        </div>
+                        <div class="text-xl text-center font-semibold text-[#013756]">
+                            <p><span>20</span> cartas pendentes</p>
+                        </div>
+                    </div>
+
+                    <div id="card" class="h-full aspect-2/3 bg-[#FE9A09] rounded-3xl p-6 flex flex-col justify-between snap-center">
+                        <div class="flex justify-between">
+                            <p class="text-3xl text-[#013756] font-bold">teste</p>
+                            <div class="flex items-center">
+                                <p class="text-xl text-[#013756]">100 cartas</p>
+                            </div>
+                        </div>
+                        <div class="text-xl text-center font-semibold text-[#013756]">
+                            <p><span>20</span> cartas pendentes</p>
+                        </div>
+                    </div> 
+
+                    <div id="card" class="h-full aspect-2/3 bg-[#FE9A09] rounded-3xl p-6 flex flex-col justify-between snap-center">
+                        <div class="flex justify-between">
+                            <p class="text-3xl text-[#013756] font-bold">teste</p>
+                            <div class="flex items-center">
+                                <p class="text-xl text-[#013756]">100 cartas</p>
+                            </div>
+                        </div>
+                        <div class="text-xl text-center font-semibold text-[#013756]">
+                            <p><span>20</span> cartas pendentes</p>
+                        </div>
+                    </div>
+
+                    <div id="card" class="h-full aspect-2/3 bg-[#bebebe] border-2 border-dashed border-[#9e9e9e] rounded-3xl p-6 flex flex-col justify-between snap-center">
+                        <div class="flex justify-center items-center h-full">
+                            <img src="{% static 'resouces/add-card.svg' %}" alt="User" class="size-16 opacity-50">
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <div class="h-28 md:h-0 flex-none"></div>
+        </main>
+    </section>
+{% endblock body %}
+
+{% block extra_body %}
+    <script>
+        (function(){
+            const nav = document.getElementById('main-nav');
+            const bg = document.getElementById('nav-bg');
+            const buttons = Array.from(nav.querySelectorAll('.nav-btn'));
+
+            // media query para md (>= 48rem / 768px)
+            const mql = window.matchMedia('(min-width: 48rem)');
+
+            function moveBgTo(btn) {
+                const navRect = nav.getBoundingClientRect();
+                const btnRect = btn.getBoundingClientRect();
+
+                if (mql.matches) {
+                    // Desktop / md+: mover verticalmente (top)
+                    const top = btnRect.top - navRect.top + (btnRect.height / 2) - (bg.offsetHeight / 2);
+                    bg.style.top = Math.max(-9999, top) + 'px';
+                    // limpar left para evitar conflitos
+                    bg.style.left = '';
+                } else {
+                    // Mobile: mover horizontalmente (left)
+                    const left = btnRect.left - navRect.left + (btnRect.width / 2) - (bg.offsetWidth / 2);
+                    bg.style.left = Math.max(0, left) + 'px';
+                    bg.style.top = '';
+                }
+
+                // atualizar estado ativo via classes Tailwind responsivas
+                buttons.forEach(b => {
+                    b.classList.remove('-translate-y-[29px]');
+                    b.classList.remove('md:translate-x-11');
+                });
+
+                if (mql.matches) {
+                    btn.classList.add('md:translate-x-11');
+                } else {
+                    btn.classList.add('-translate-y-[29px]');
+                }
+            }
+
+            // Adicionar listeners
+            buttons.forEach(btn => {
+                btn.addEventListener('click', function(e){
+                    // prevenir navegação padrão se for <a>
+                    if (e && typeof e.preventDefault === 'function') e.preventDefault();
+                    moveBgTo(btn);
+                });
+
+                // suporte a teclado: Enter / Space
+                btn.addEventListener('keydown', function(e){
+                    if (e.key === 'Enter' || e.key === ' ') {
+                        e.preventDefault();
+                        moveBgTo(btn);
+                    }
+                });
+            });
+
+            // Reposicionar ao redimensionar e quando a media query mudar
+            function repositionActive() {
+                const active = buttons.find(b => b.classList.contains('-translate-y-[29px]') || b.classList.contains('md:translate-x-11')) || buttons[0];
+                if (active) moveBgTo(active);
+            }
+
+            window.addEventListener('resize', repositionActive);
+            if (typeof mql.addEventListener === 'function') {
+                mql.addEventListener('change', repositionActive);
+            } else if (typeof mql.addListener === 'function') {
+                mql.addListener(repositionActive);
+            }
+
+            // Inicializar: posicionar atrás do primeiro botão (ou do ativo se houver)
+            window.addEventListener('load', function(){
+                repositionActive();
+            });
+        })();
+    </script>
+{% endblock extra_body %}

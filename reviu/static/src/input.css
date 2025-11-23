@@ -5,3 +5,20 @@
   src: url('../fonts/minhafonte.woff2') format('woff2');
   font-weight: normal;
 }
+
+@layer utilities {
+      /* Chrome, Safari and Opera */
+      .scrollbar-hidden::-webkit-scrollbar {
+        display: none;
+      }
+
+      /* IE and Edge */
+      .scrollbar-hidden {
+        -ms-overflow-style: none;
+      }
+
+      /* Firefox */
+      .scrollbar-hidden {
+        scrollbar-width: none;
+      }
+    }
