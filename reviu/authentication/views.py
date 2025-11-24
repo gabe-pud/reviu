@@ -52,3 +52,5 @@ def login_view(request):
 
     else:
         return render(request, 'authentication/login.html')
+    
+    
