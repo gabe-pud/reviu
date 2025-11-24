@@ -1,0 +1,56 @@
+{% extends 'base.html' %}
+{% load static %}
+
+{% block title %}
+  Login - Reviu
+{% endblock %}
+
+{% block body %}
+  <div class="bg-[#003554] min-h-screen flex items-center justify-center">
+    <!-- Section que contém tudo -->
+    <section class="relative">
+      <!-- 1. Corpo do elefante (z-0) -->
+      <div class= "h-22 w-full">
+
+      </div>
+      <img src="{% static 'resouces/decko-corpo.svg'%}" alt="Elephant" class="absolute -top-20 left-1/2 transform -translate-x-1/2  z-0"  />
+
+      <!-- 2. Área de cadastro (z-10) -->
+      <div class="z-10 relative">
+         <form method="post" class="bg-gradient-to-b from-[#045685] to-[#003554] rounded-3xl p-8 pt-[70px] pb-20 w-full shadow-2xl ">   {#o PB-20 é altura na parte de baixo do card#}
+          {% csrf_token %}
+
+          <h1 style="font-family: 'Space Grotesk';" class="text-white text-2xl font-bold mb-6 text-center">Welcome Back!</h1>
+
+          <div class="mb-6">
+            <label for="email" style="font-family: 'Space Grotesk';" class="block text-white text-sm mb-2">Email Address</label>
+            <div class="relative">
+              <div class="absolute inset-y-0 left-0 pl-4 flex items-center pointer-events-none">
+                <img src="{% static 'resouces/email-ico.svg' %}" alt="Email" class="w-5 h-5">
+              </div>
+              <input type="text" id="email" name="email" required placeholder="yourname@gmail.com" style="font-family: 'Poppins';" class="w-full pl-12 pr-4 py-2 bg-[#5A8AAA] bg-opacity-40 text-white placeholder-gray-300 border-none rounded-full focus:outline-none focus:ring-2 focus:ring-blue-400" />
+            </div>
+          </div>
+
+          <div class="mb-6">
+            <label for="password" style="font-family: 'Poppins';" class="block text-white text-sm mb-2">Password</label>
+            <div class="relative">
+              <!-- SVG do ícone de cadeado -->
+              <div class="absolute inset-y-0 left-0 pl-4 flex items-center pointer-events-none">
+                <img src="{% static 'resouces/key-ico.svg' %}" alt="Key" class="w-5 h-5">
+              </div>
+              <!-- Input com padding à esquerda para dar espaço ao ícone -->
+              <input type="password" id="password" name="password" required placeholder="••••••••" style="font-family: 'Space Grotesk';" class="w-full pl-12 pr-4 py-2 bg-[#5A8AAA] bg-opacity-40 text-white placeholder-gray-300 border-none rounded-full focus:outline-none focus:ring-2 focus:ring-blue-400" />
+            </div>
+          </div>
+          <div class="flex justify-center mt-2">
+            <button type="submit" style="font-family: 'Space Grotesk';" class="w-full bg-[#FE9A09] hover:bg-[#E68A00] text-[#12130F] text-xl font-semibold py-2 rounded-full transition duration-300 shadow-lg">Sign Up</button>
+          </div>
+        </form>
+      </div>
+      
+        <img  src="{% static 'resouces/decko-maos.svg' %}" alt="Elephant" class = "absolute -top-20 left-1/2 transform -translate-x-1/2 translate-y-30  z-20" />
+      
+    </section>
+  </div>
+{% endblock %}

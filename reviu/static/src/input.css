@@ -1,1 +1,7 @@
 @import "tailwindcss";
+
+@font-face {
+  font-family: 'MinhaFonte';
+  src: url('../fonts/minhafonte.woff2') format('woff2');
+  font-weight: normal;
+}
