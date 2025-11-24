@@ -1,7 +1,7 @@
 {% extends "base.html" %}
 {% load static %}
 
-{% block title %}reviu - register{% endblock title %}
+{% block title %}Reviu - Registrar{% endblock title %}
 
 {% block body %}
     <section class="min-h-screen flex items-center justify-center bg-[#013756]">
@@ -13,30 +13,30 @@
 
                 <div class="relative z-10 w-full bg-linear-to-b from-[#045685] to-[#003554] rounded-2xl overflow-hidden">
                     <div class="p-6 pb-8">
-                    <h1 class="text-3xl font-extrabold text-white text-center mt-4">Get Started For Free</h1>
+                    <h1 class="text-3xl font-extrabold text-white text-center mt-4">Começe Gratuitamente</h1>
                     <form method="post" action="" class="mt-6 space-y-4">{% csrf_token %}
                         <div>
-                            <label class="text-[#DBDBDB] text-sm">Email Address</label>
+                            <label class="text-[#DBDBDB] text-sm">Email</label>
                             <div class="mt-2 relative">
                                 <span class="absolute left-3 top-1/2 -translate-y-1/2 text-[#DBDBDB]">
                                     <img src="{% static 'resouces/email-ico.svg' %}" class="w-5 h-5" alt="">
                                 </span>
-                                <input name="email" type="email" required class="w-full pl-12 pr-4 py-3 rounded-full bg-[#D9D9D950] placeholder-[#A4A4A4] text-[#DBDBDB] focus:outline-none focus:ring-2 focus:ring-[#FE9A09]" placeholder="yourname@gmail.com">
+                                <input name="email" type="email" required class="w-full pl-12 pr-4 py-3 rounded-full bg-[#D9D9D950] placeholder-[#A4A4A4] text-[#DBDBDB] focus:outline-none focus:ring-2 focus:ring-[#FE9A09]" placeholder="exemplo@gmail.com">
                             </div>
                         </div>
 
                         <div>
-                            <label class="text-[#DBDBDB] text-sm">Your Name</label>
+                            <label class="text-[#DBDBDB] text-sm">Nome</label>
                             <div class="mt-2 relative">
                                 <span class="absolute left-3 top-1/2 -translate-y-1/2 text-[#DBDBDB]">
                                     <img src="{% static 'resouces/user-ico.svg' %}" class="w-5 h-5" alt="">
                                 </span>
-                                <input name="name" type="text" required class="w-full pl-12 pr-4 py-3 rounded-full bg-[#D9D9D950] placeholder-[#A4A4A4] text-[#DBDBDB] focus:outline-none focus:ring-2 focus:ring-[#FE9A09]" placeholder="Yourname">
+                                <input name="name" type="text" required class="w-full pl-12 pr-4 py-3 rounded-full bg-[#D9D9D950] placeholder-[#A4A4A4] text-[#DBDBDB] focus:outline-none focus:ring-2 focus:ring-[#FE9A09]" placeholder="Seu Nome">
                             </div>
                         </div>
 
                         <div>
-                            <label class="text-[#DBDBDB] text-sm">Password</label>
+                            <label class="text-[#DBDBDB] text-sm">Senha</label>
                             <div class="mt-2 relative">
                                 <span class="absolute left-3 top-1/2 -translate-y-1/2 text-[#DBDBDB]">
                                     <img src="{% static 'resouces/key-ico.svg' %}" class="w-5 h-5" alt="">
@@ -46,7 +46,7 @@
                         </div>
 
                         <div>
-                            <label class="text-[#DBDBDB] text-sm">Confirm Password</label>
+                            <label class="text-[#DBDBDB] text-sm">Confirmar senha</label>
                             <div class="mt-2 relative">
                                 <span class="absolute left-3 top-1/2 -translate-y-1/2 text-[#DBDBDB]">
                                     <img src="{% static 'resouces/key-ico.svg' %}" class="w-5 h-5" alt="">
@@ -56,9 +56,12 @@
                         </div>
 
                         <div>
-                            <button type="submit" class="w-full mt-4.5 py-3 rounded-full bg-[#FE9A09] text-[#12130F] font-semibold shadow-md hover:brightness-95">Sign Up</button>
+                            <button type="submit" class="w-full mt-4.5 py-3 rounded-full bg-[#FE9A09] text-[#12130F] font-semibold shadow-md hover:brightness-95">Cadastrar</button>
                         </div>
                     </form>
+                    <div class="flex justify-center mt-3 ">
+                      <p class="text-[#DBDBDB] text-lg">já posui uma conta? <span class="text-[#FE9A09] text-lg"><a href="{% url 'login' %}">entre aqui</a></span></p>
+                    </div>
                     </div>
                 </div>
 

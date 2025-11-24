@@ -4,8 +4,10 @@ from datetime import date, datetime
 
 # Create your views here.
 def main_page(request):
-
     hoje = date.today()
+
+    if request.session.get('auth_token') == None:
+        return redirect('login')
 
     headers={
         "Authorization":request.session.get('auth_token')

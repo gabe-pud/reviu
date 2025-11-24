@@ -255,6 +255,9 @@
   .mt-2 {
     margin-top: calc(var(--spacing) * 2);
   }
+  .mt-3 {
+    margin-top: calc(var(--spacing) * 3);
+  }
   .mt-4 {
     margin-top: calc(var(--spacing) * 4);
   }
@@ -267,26 +270,17 @@
   .mt-8 {
     margin-top: calc(var(--spacing) * 8);
   }
-  .mb-1 {
-    margin-bottom: calc(var(--spacing) * 1);
-  }
   .mb-2 {
     margin-bottom: calc(var(--spacing) * 2);
   }
   .mb-3 {
     margin-bottom: calc(var(--spacing) * 3);
   }
-  .mb-4 {
-    margin-bottom: calc(var(--spacing) * 4);
-  }
   .mb-6 {
     margin-bottom: calc(var(--spacing) * 6);
   }
   .mb-18 {
     margin-bottom: calc(var(--spacing) * 18);
-  }
-  .mb-24 {
-    margin-bottom: calc(var(--spacing) * 24);
   }
   .ml-3 {
     margin-left: calc(var(--spacing) * 3);
@@ -296,6 +290,9 @@
   }
   .flex {
     display: flex;
+  }
+  .hidden {
+    display: none;
   }
   .table {
     display: table;
@@ -320,9 +317,6 @@
   .h-24 {
     height: calc(var(--spacing) * 24);
   }
-  .h-28 {
-    height: calc(var(--spacing) * 28);
-  }
   .h-60 {
     height: calc(var(--spacing) * 60);
   }
@@ -346,6 +340,12 @@
   }
   .w-full {
     width: 100%;
+  }
+  .w-screen {
+    width: 100vw;
+  }
+  .max-w-fit {
+    max-width: fit-content;
   }
   .max-w-md {
     max-width: var(--container-md);
@@ -431,6 +431,9 @@
   .overflow-hidden {
     overflow: hidden;
   }
+  .overflow-scroll {
+    overflow: scroll;
+  }
   .overflow-x-scroll {
     overflow-x: scroll;
   }
@@ -459,12 +462,6 @@
     --tw-border-style: none;
     border-style: none;
   }
-  .border-\[\#9e9e9e\] {
-    border-color: #9e9e9e;
-  }
-  .border-\[\#013756\] {
-    border-color: #013756;
-  }
   .border-\[\#01375683\] {
     border-color: #01375683;
   }
@@ -486,6 +483,9 @@
   .bg-\[\#bebebe\] {
     background-color: #bebebe;
   }
+  .bg-\[\#ffffff2d\] {
+    background-color: #ffffff2d;
+  }
   .bg-\[\#ffffff\] {
     background-color: #ffffff;
   }
@@ -496,10 +496,6 @@
     }
     background-image: linear-gradient(var(--tw-gradient-stops));
   }
-  .bg-gradient-to-b {
-    --tw-gradient-position: to bottom in oklab;
-    background-image: linear-gradient(var(--tw-gradient-stops));
-  }
   .from-\[\#045685\] {
     --tw-gradient-from: #045685;
     --tw-gradient-stops: var(--tw-gradient-via-stops, var(--tw-gradient-position), var(--tw-gradient-from) var(--tw-gradient-from-position), var(--tw-gradient-to) var(--tw-gradient-to-position));
@@ -507,6 +503,9 @@
   .to-\[\#003554\] {
     --tw-gradient-to: #003554;
     --tw-gradient-stops: var(--tw-gradient-via-stops, var(--tw-gradient-position), var(--tw-gradient-from) var(--tw-gradient-from-position), var(--tw-gradient-to) var(--tw-gradient-to-position));
+  }
+  .p-2 {
+    padding: calc(var(--spacing) * 2);
   }
   .p-3 {
     padding: calc(var(--spacing) * 3);
@@ -593,6 +592,9 @@
   }
   .text-\[\#DBDBDB\] {
     color: #DBDBDB;
+  }
+  .text-\[\#FE9A09\] {
+    color: #FE9A09;
   }
   .text-white {
     color: var(--color-white);
@@ -690,11 +692,6 @@
     &:focus {
       --tw-outline-style: none;
       outline-style: none;
-    }
-  }
-  .sm\:mb-3 {
-    @media (width >= 40rem) {
-      margin-bottom: calc(var(--spacing) * 3);
     }
   }
   .sm\:mb-4 {

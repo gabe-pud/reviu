@@ -27,12 +27,11 @@ def register_view(request):
             return render(request, 'authentication/register.html', {'error': 'Falha no registro: ' + info.text})
 
     else:
-        return render(request, 'authentication/register.html')
+        return render(request, 'authentication/register.html', {"page":"auth"})
 
 
 def login_view(request):
     if request.method == 'POST':
-        print(request.POST.get('password'))
         data = {
             "email": request.POST.get('email'),
             "password": request.POST.get('password')
@@ -56,4 +55,8 @@ def login_view(request):
             return render(request, 'authentication/login.html', {'error': 'Falha no Login: ' + info.text})
 
     else:
-        return render(request, 'authentication/login.html')
+        return render(request, 'authentication/login.html', {"page":"auth"})
+
+def logout(request):
+    request.session.clear()
+    return redirect('login')
