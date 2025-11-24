@@ -15,7 +15,7 @@ def register_view(request):
             "email": request.POST.get('email'),
             "password": senha
         }
-
+        print(data)
         info = requests.post('http://localhost:8080/auth/register', json=data)
         print(info)
 
