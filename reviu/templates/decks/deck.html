@@ -10,25 +10,9 @@
         <img src="{% static 'resouces/decko.svg' %}" alt="">
     </div>
 <div class="h-screen flex">
-
-<nav id="main-nav" class="absolute flex justify-between px-16 pb-4 w-full bottom-0 z-20 bg-[#003554]
-md:static md:left-0 md:bottom-auto md:flex-col md:pr-4 md:pl-2 md:py-16 md:w-fit md:justify-start md:gap-5">
-    <img id="nav-bg" class="absolute left-9 -top-[33.5px] w-28 pointer-events-none transition-all duration-300 ease-in-out z-10
-    md:rotate-90 md:left-4.75 md:top-13.5" src="{% static 'resouces/nav-button-bg.svg' %}" alt="">
-
-    <a href="#" data-page="home" class="nav-btn size-14 p-3 rounded-full transition-transform duration-300 ease-in-out z-30 -translate-y-[29px] md:translate-y-0 md:translate-x-11" role="button" aria-current="page">
-        <img src="{% static 'resouces/home.svg' %}" alt="Home">
-    </a>
-    <a href="#" data-page="decks" class="nav-btn size-14 p-3 rounded-full transition-transform duration-300 ease-in-out z-30" role="button">
-        <img src="{% static 'resouces/cards.svg' %}" alt="Cards">
-    </a>
-    <a href="#" data-page="user" class="nav-btn size-14 p-3 rounded-full transition-transform duration-300 ease-in-out z-30" role="button">
-        <img src="{% static 'resouces/user.svg' %}" alt="User">
-    </a>
-</nav>
-
+    
     <!-- Decks Sidebar (Escondida por padrão, visível no desktop quando decks estiver ativo) -->
-    <aside id="decks-sidebar" class="hidden md:flex-col bg-white w-64 border-r border-gray-200 p-6 md:ml-8">
+    <aside id="decks-sidebar" class="md:flex-col bg-white w-64 border-r border-gray-200 p-6 md:ml-8">
         <!-- Header com Título e Botões -->
         <div class="flex items-center justify-between mb-6">
             <h2 style="font-family: 'Space Grotesk';" class="text-[#003554] text-2xl font-bold">Decks</h2>
@@ -61,7 +45,7 @@ md:static md:left-0 md:bottom-auto md:flex-col md:pr-4 md:pl-2 md:py-16 md:w-fit
     </aside>
 
     <!-- Área de Conteúdo Principal -->
-    <div id="decks-content" class="flex-1 bg-white relative overflow-hidden hidden">
+    <div id="decks-content" class="flex-1 bg-white relative overflow-hidden">
         <!-- Conteúdo dos Cards do Deck Selecionado -->
         <div class="p-8 md:p-12">
             <div class="mb-8">
@@ -76,7 +60,7 @@ md:static md:left-0 md:bottom-auto md:flex-col md:pr-4 md:pl-2 md:py-16 md:w-fit
             <!-- Grid de Cards -->
             <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6 max-w-6xl" id="cards-grid">
                 <!-- Card Individual -->
-                <div class="card-flip-container min-h-64 cursor-pointer" data-card-id="1" style="perspective: 1000px;">
+                <div class="card-flip-container min-h-64 aspect-2/3 cursor-pointer" data-card-id="1" style="perspective: 1000px;">
                     <div class="card-flip-inner relative w-full h-full transition-transform duration-500" style="transform-style: preserve-3d;">
                         <!-- Frente do Card -->
                         <div class="card-front absolute w-full h-full bg-linear-to-b from-[#FE9A09] to-[#FF8000] rounded-3xl p-6 shadow-lg flex flex-col justify-between" style="backface-visibility: hidden;">
@@ -346,7 +330,6 @@ md:static md:left-0 md:bottom-auto md:flex-col md:pr-4 md:pl-2 md:py-16 md:w-fit
             const decksSidebar = document.getElementById('decks-sidebar');
             const decksContent = document.getElementById('decks-content');
 
-
             // Card flip functionality
             const cardContainers = document.querySelectorAll('.card-flip-container');
             cardContainers.forEach(container => {
@@ -427,7 +410,7 @@ md:static md:left-0 md:bottom-auto md:flex-col md:pr-4 md:pl-2 md:py-16 md:w-fit
                             }
                             
                             const newDeck = document.createElement('div');
-                            newDeck.className = 'bg-linear-to-b from-[#FE9A09] to-[#FF8000] rounded-2xl p-4 cursor-pointer hover:shadow-lg transition-shadow';
+                            newDeck.className = 'bg-gradient-to-b from-[#FE9A09] to-[#FF8000] rounded-2xl p-4 cursor-pointer hover:shadow-lg transition-shadow';
                             newDeck.setAttribute('data-deck-id', data.id);
                             newDeck.innerHTML = `<h3 style="font-family: 'Space Grotesk';" class="text-[#003554] text-sm font-bold">${data.name}</h3>`;
                             
@@ -678,7 +661,7 @@ md:static md:left-0 md:bottom-auto md:flex-col md:pr-4 md:pl-2 md:py-16 md:w-fit
                             newCard.style.perspective = '1000px';
                             newCard.innerHTML = `
                                 <div class="card-flip-inner relative w-full h-full transition-transform duration-500" style="transform-style: preserve-3d;">
-                                    <div class="card-front absolute w-full h-full bg-linear-to-b from-[#FE9A09] to-[#FF8000] rounded-3xl p-6 shadow-lg flex flex-col justify-between" style="backface-visibility: hidden;">
+                                    <div class="card-front absolute w-full h-full bg-gradient-to-b from-[#FE9A09] to-[#FF8000] rounded-3xl p-6 shadow-lg flex flex-col justify-between" style="backface-visibility: hidden;">
                                         <div class="flex-1 flex items-center justify-center">
                                             <p style="font-family: 'Space Grotesk';" class="card-question text-[#003554] text-lg font-bold text-center">${question}</p>
                                         </div>
@@ -698,7 +681,7 @@ md:static md:left-0 md:bottom-auto md:flex-col md:pr-4 md:pl-2 md:py-16 md:w-fit
                                             </div>
                                         </div>
                                     </div>
-                                    <div class="card-back absolute w-full h-full bg-linear-to-b from-[#003554] to-[#002a42] rounded-3xl p-6 shadow-lg flex flex-col justify-center items-center" style="backface-visibility: hidden; transform: rotateY(180deg);">
+                                    <div class="card-back absolute w-full h-full bg-gradient-to-b from-[#003554] to-[#002a42] rounded-3xl p-6 shadow-lg flex flex-col justify-center items-center" style="backface-visibility: hidden; transform: rotateY(180deg);">
                                         <p style="font-family: 'Space Grotesk';" class="card-answer text-white text-xl font-bold text-center mb-4">${answer}</p>
                                         <p style="font-family: 'Space Grotesk';" class="text-white text-sm text-center opacity-75">Clique novamente para voltar</p>
                                     </div>
