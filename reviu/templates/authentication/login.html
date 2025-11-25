@@ -6,6 +6,9 @@
 {% block body %}
   <section class="min-h-screen flex items-center justify-center bg-[#013756]">
         <main class="w-full max-w-md">
+            {% if error %}
+                <div id="flash-error" class="fixed top-4 left-1/2 -translate-x-1/2 -translate-y-6 w-full max-w-md p-4 bg-red-100 text-red-700 text-center rounded-full z-50 opacity-0 transition-all duration-500">{{ error }}</div>
+            {% endif %}
             <div class="relative flex flex-col justify-center -mt-8">
                 <div class="h-60 w-full"></div>
 
@@ -15,6 +18,7 @@
                     <div class="p-6 pb-8">
                     <h1 class="text-3xl font-extrabold text-white text-center mt-4">Bem-vindo de volta!</h1>
                     <form method="post" action="" class="mt-6 space-y-4">{% csrf_token %}
+                        
                         <div>
                             <label class="text-[#DBDBDB] text-sm">Email</label>
                             <div class="mt-2 relative">
@@ -50,3 +54,28 @@
         </main>
     </section>
 {% endblock %}
+{% block extra_body %}
+    <script>
+        // Show flash error from top, keep 5s, then fade out
+        document.addEventListener('DOMContentLoaded', function(){
+            const el = document.getElementById('flash-error');
+            if (!el) return;
+
+            // allow initial render, then slide/fade in
+            requestAnimationFrame(() => {
+                // remove upward translate and make fully opaque
+                el.classList.remove('-translate-y-6');
+                el.classList.add('translate-y-0', 'opacity-100');
+            });
+
+            // after 5s, hide again with reverse animation and remove from DOM after transition
+            const visibleMs = 5000;
+            setTimeout(() => {
+                el.classList.remove('translate-y-0', 'opacity-100');
+                el.classList.add('-translate-y-6', 'opacity-0');
+                // remove after transition (duration-500 -> 500ms)
+                setTimeout(() => { try { el.remove(); } catch(e){} }, 600);
+            }, visibleMs + 200); // small offset to ensure entrance finished
+        });
+    </script>
+{% endblock extra_body %}

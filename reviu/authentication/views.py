@@ -7,7 +7,7 @@ def register_view(request):
         if request.POST.get('password1') == request.POST.get('password2'):
             senha = request.POST.get('password1')
         else:
-            return redirect('register')
+            return render(request, 'authentication/register.html', {'error': 'As senhas não conferem.', 'page': 'auth'})
 
         data = {
             "name": request.POST.get('name'),
@@ -16,14 +16,17 @@ def register_view(request):
             "password": senha
         }
 
-        info = requests.post('http://localhost:8080/auth/register', json=data)
-
-        if info.status_code == 200 or info.status_code == 201:
-            print("Registro bem-sucedido:", info.text)
-            return redirect('verify_email') # alterar para pagina de verificação de email quando disponível
-        else:
-            print("Erro no registro. Status:", info.status_code, "Resposta:", info.text)
-            return render(request, 'authentication/register.html', {'error': 'Falha no registro: ' + info.text})
+        try:
+            info = requests.post('http://localhost:8080/auth/register', json=data, timeout=10)
+            if info.status_code in (200, 201):
+                print("Registro bem-sucedido:", info.text)
+                return redirect('verify_email')
+            else:
+                print("Erro no registro. Status:", info.status_code, "Resposta:", info.text)
+                return render(request, 'authentication/register.html', {'error': 'Falha no registro: ' + info.text, 'page': 'auth'})
+        except requests.exceptions.RequestException as e:
+            print(f"Erro ao conectar com serviço de autenticação: {e}")
+            return render(request, 'authentication/register.html', {'error': 'Erro ao conectar com o serviço de autenticação.', 'page': 'auth'})
 
     else:
         return render(request, 'authentication/register.html', {"page":"auth"})
@@ -35,22 +38,24 @@ def login_view(request):
             "email": request.POST.get('email'),
             "password": request.POST.get('password')
         }
+        try:
+            info = requests.post('http://localhost:8080/auth/login', json=data, timeout=10)
+            if info.status_code in (200, 201):
+                print("Login bem-sucedido:", info.text)
 
-        info = requests.post('http://localhost:8080/auth/login', json=data)
+                name = info.json().get("name")
+                token = info.json().get("token")
 
-        if info.status_code == 200 or info.status_code == 201:
-            print("Login bem-sucedido:", info.text)
+                request.session['name'] = name
+                request.session['auth_token'] = token
 
-            name = info.json().get("name")
-            token = info.json().get("token")
-
-            request.session['name'] = name
-            request.session['auth_token'] = token
-
-            return redirect('home') # alterar para pagina de verificação de email quando disponível
-        else:
-            print("Erro no login. Status:", info.status_code, "Resposta:", info.text)
-            return render(request, 'authentication/login.html', {'error': 'Falha no Login: ' + info.text})
+                return redirect('home')
+            else:
+                print("Erro no login. Status:", info.status_code, "Resposta:", info.text)
+                return render(request, 'authentication/login.html', {'error': 'Falha no Login: ' + str(info.status_code), 'page': 'auth'})
+        except requests.exceptions.RequestException as e:
+            print(f"Erro ao conectar com serviço de autenticação: {e}")
+            return render(request, 'authentication/login.html', {'error': 'Erro ao conectar com o serviço de autenticação.', 'page': 'auth'})
 
     else:
         return render(request, 'authentication/login.html', {"page":"auth"})
@@ -78,24 +83,30 @@ def verify_email_view(request):
         payload = { 'code': code }
         try:
             resp = requests.post('http://localhost:8080/auth/verify', json=payload, timeout=10)
-            if resp.status_code in (200, 201):
-                # verification successful
-                name = resp.json().get("name")
-                token = resp.json().get("token")
-
-                request.session['name'] = name
-                request.session['auth_token'] = token
-                return redirect('home')
-            else:
-                # show API error message
-                msg = resp.text or f'Status {resp.status_code}'
-                return render(request, 'authentication/verificar_email.html', {
-                    'error': 'Falha na verificação: ' + msg,
-                    'page': 'auth'
-                })
         except requests.exceptions.RequestException as e:
+            print(f"Erro ao conectar com serviço de autenticação: {e}")
             return render(request, 'authentication/verificar_email.html', {
                 'error': 'Erro ao conectar com o serviço de autenticação.',
+                'page': 'auth'
+            })
+
+        if resp.status_code in (200, 201):
+            # verification successful
+            try:
+                name = resp.json().get("name")
+                token = resp.json().get("token")
+                if name:
+                    request.session['name'] = name
+                if token:
+                    request.session['auth_token'] = token
+            except Exception:
+                pass
+            return redirect('home')
+        else:
+            # show API error message
+            msg = resp.text or f'Status {resp.status_code}'
+            return render(request, 'authentication/verificar_email.html', {
+                'error': 'Falha na verificação: ' + msg,
                 'page': 'auth'
             })
 

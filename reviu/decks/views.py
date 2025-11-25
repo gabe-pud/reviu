@@ -1,6 +1,7 @@
 from django.shortcuts import render, redirect
 import requests
 from datetime import datetime, timedelta, date
+import json
 
 # Create your views here.
 
@@ -200,6 +201,68 @@ def deletar_card(request, deck_id, card_id):
         dados_api = {'cards': []}
         
     return redirect("decks")
+
+
+def gerar_cards_from_file(request, deck_id):
+    """Upload a PDF to the external API to generate cards, then bulk-create them.
+
+    Expects a POST with a file in `request.FILES['file']` and will:
+    1. POST the file to /decks/{deck_id}/cards/generate-from-file with form field `file` and `type=pdf`.
+    2. POST the returned cards to /decks/{deck_id}/cards/bulk as JSON to create them.
+    """
+    if request.session.get('auth_token') is None:
+        return redirect('login')
+
+    if request.method != 'POST':
+        return redirect('decks')
+
+    uploaded_file = request.FILES.get('file')
+    if not uploaded_file:
+        return redirect('decks')
+
+    API_BASE = 'http://localhost:8080'
+    headers = {}
+    token = request.session.get('auth_token')
+    if token:
+        headers['Authorization'] = token
+
+    # 1) Send the file to the generate-from-file endpoint
+    gen_url = f"{API_BASE}/decks/{deck_id}/cards/generate-from-file"
+    files = {
+        'file': (uploaded_file.name, uploaded_file.read(), 'application/pdf')
+    }
+    data = {'type': 'pdf'}
+
+    try:
+        resp = requests.post(gen_url, headers=headers, files=files, data=data, timeout=120)
+        resp.raise_for_status()
+        gen_result = resp.json()
+    except requests.exceptions.RequestException as e:
+        print(f"Erro ao enviar arquivo para gerar cards: {e}")
+        return redirect('decks')
+
+    # Normalize cards list from response
+    if isinstance(gen_result, dict) and 'cards' in gen_result:
+        cards_list = gen_result.get('cards') or []
+    elif isinstance(gen_result, list):
+        cards_list = gen_result
+    else:
+        # Unexpected shape
+        cards_list = []
+
+    if not cards_list:
+        return redirect('decks')
+
+    # 2) Send the generated cards in bulk to create them
+    bulk_url = f"{API_BASE}/decks/{deck_id}/cards/bulk"
+    try:
+        # include Authorization header and let requests set Content-Type
+        resp2 = requests.post(bulk_url, headers=headers, json={'cards': cards_list}, timeout=60)
+        resp2.raise_for_status()
+    except requests.exceptions.RequestException as e:
+        print(f"Erro ao criar cards em bulk: {e}")
+
+    return redirect('decks')
 
 
 def card_review(request, deck_id):

@@ -62,18 +62,19 @@
                 <h1 class="text-[#003554] text-4xl font-bold mb-2">{{current_deck_name}}</h1>
                 <p class="text-[#003554] text-lg">0 cartas para revisar hoje</p>
                 {% if current_deck_id %}
-                <div class="mt-4">
+                <div class="mt-4 flex items-center gap-3">
                     <form id="form-start-review" method="post" action="{% url 'card_review' deck_id=current_deck_id %}">
                         {% csrf_token %}
                         <button type="submit" name="deck_id" value="{{ current_deck_id }}" class="px-4 py-2 rounded-full bg-[#003554] text-white font-semibold mt-2">Iniciar Revisão</button>
                     </form>
+
+                    <button id="btn-open-generate-modal" type="button" class="px-4 py-2 rounded-full border-2 border-[#003554] text-[#003554] font-semibold mt-2 hover:bg-[#f6fbfd]">Gerar com IA</button>
                 </div>
                 {% endif %}
             </div>
 
             <!-- Grid de Cards -->
-            <!-- Use auto-fit/minmax para não colocar mais colunas do que cabem -->
-            <div class="grid w-full grid-cols-[repeat(auto-fit,minmax(260px,1fr))] gap-6 max-w-6xl" id="cards-grid">
+            <div class="grid w-full gap-6" id="cards-grid" style="--card-max-width:260px; grid-template-columns: repeat(auto-fit, minmax(0, var(--card-max-width)));">
                 <!-- Card Individual -->
                 {% for card in cards %}
                 <div class="card-flip-container h-98 aspect-2/3 cursor-pointer" data-card-id="{{card.id}}" style="perspective: 1000px;">
@@ -167,6 +168,44 @@
         </form>
     </div>
 </div>
+
+    <!-- Modal Gerar Cards a partir de Arquivo -->
+    <div id="modal-generate-from-file" class="hidden fixed inset-0 bg-[#00000046] z-50 flex items-center justify-center p-4">
+        <div class="bg-white rounded-3xl p-8 max-w-md w-full shadow-2xl">
+            <h2 class="text-[#003554] text-2xl font-bold mb-6">Gerar Cartas a partir de Arquivo (PDF)</h2>
+        
+            <form id="form-generate-from-file" method="post" action="{% if current_deck_id %}{% url 'gerar_cards_from_file' deck_id=current_deck_id %}{% else %}#{% endif %}" enctype="multipart/form-data">
+                {% csrf_token %}
+                <div class="mb-4">
+                    <label class="text-[#003554] text-sm font-semibold mb-2 block">Arquivo (PDF)</label>
+                    <input 
+                        type="file" 
+                        id="generate-file-input"
+                        name="file"
+                        accept="application/pdf"
+                        class="w-full px-4 py-3 rounded-xl border-2 border-gray-300 focus:border-[#FE9A09] focus:outline-none transition-colors"
+                        required
+                    />
+                </div>
+
+                <div class="flex gap-3">
+                    <button 
+                        type="button" 
+                        id="btn-cancel-generate-file"
+                        class="flex-1 px-6 py-3 rounded-full border-2 border-gray-300 text-gray-700 font-semibold hover:bg-gray-100 transition-colors"
+                    >
+                        Cancelar
+                    </button>
+                    <button 
+                        type="submit"
+                        class="flex-1 px-6 py-3 rounded-full bg-[#003554] hover:bg-[#004565] text-white font-semibold transition-colors"
+                    >
+                        Enviar e Gerar
+                    </button>
+                </div>
+            </form>
+        </div>
+    </div>
 
 <!-- Modal Editar Carta -->
 <div id="modal-edit-card" class="hidden fixed inset-0 bg-[#00000046] z-50 flex items-center justify-center p-4">
@@ -621,6 +660,49 @@
                     formAddCard.submit();
                 }
             });
+
+            // Modal Gerar Cards a partir de Arquivo (PDF)
+            const modalGenerateFile = document.getElementById('modal-generate-from-file');
+            const btnOpenGenerateModal = document.getElementById('btn-open-generate-modal');
+            const btnCancelGenerateFile = document.getElementById('btn-cancel-generate-file');
+            const formGenerateFile = document.getElementById('form-generate-from-file');
+
+            if (btnOpenGenerateModal) {
+                btnOpenGenerateModal.addEventListener('click', function() {
+                    if (!modalGenerateFile) return;
+                    modalGenerateFile.classList.remove('hidden');
+                    const input = document.getElementById('generate-file-input');
+                    if (input) input.focus();
+                });
+            }
+
+            if (btnCancelGenerateFile) {
+                btnCancelGenerateFile.addEventListener('click', function() {
+                    if (!modalGenerateFile || !formGenerateFile) return;
+                    modalGenerateFile.classList.add('hidden');
+                    formGenerateFile.reset();
+                });
+            }
+
+            if (modalGenerateFile) {
+                modalGenerateFile.addEventListener('click', function(e) {
+                    if (e.target === modalGenerateFile) {
+                        modalGenerateFile.classList.add('hidden');
+                        if (formGenerateFile) formGenerateFile.reset();
+                    }
+                });
+            }
+
+            if (formGenerateFile) {
+                formGenerateFile.addEventListener('submit', function(e) {
+                    const input = document.getElementById('generate-file-input');
+                    if (!input || !input.files || !input.files.length) {
+                        e.preventDefault();
+                        return;
+                    }
+                    // let the form submit normally (server will handle)
+                });
+            }
         })();
     </script>
 {% endblock extra_body %}
