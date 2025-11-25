@@ -7,15 +7,14 @@
 
 {% block body %}
 <div class="absolute right-0 top-0 pointer-events-none z-50">
-        <img src="{% static 'resouces/decko.svg' %}" alt="">
-    </div>
+    <img src="{% static 'resouces/decko.svg' %}" alt="">
+</div>
 <div class="h-screen flex">
-    
     <!-- Decks Sidebar (Escondida por padrão, visível no desktop quando decks estiver ativo) -->
     <aside id="decks-sidebar" class="md:flex-col bg-white w-64 border-r border-gray-200 p-6 md:ml-8">
         <!-- Header com Título e Botões -->
         <div class="flex items-center justify-between mb-6">
-            <h2 style="font-family: 'Space Grotesk';" class="text-[#003554] text-2xl font-bold">Decks</h2>
+            <h2 class="text-[#003554] text-2xl font-bold">Decks</h2>
             <div class="flex gap-2">
                 <button class="p-2 hover:bg-gray-100 rounded-full transition-colors">
                     <svg class="w-5 h-5 text-[#003554]" fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -32,43 +31,59 @@
 
         <!-- Lista de Decks -->
         <div class="flex-1 overflow-y-auto space-y-3">
-            <div class="bg-linear-to-b from-[#FE9A09] to-[#FF8000] rounded-2xl p-4 cursor-pointer hover:shadow-lg transition-shadow">
-                <h3 style="font-family: 'Space Grotesk';" class="text-[#003554] text-sm font-bold">Deck de Matemática</h3>
-            </div>
-            <div class="bg-linear-to-b from-[#FE9A09] to-[#FF8000] rounded-2xl p-4 cursor-pointer hover:shadow-lg transition-shadow">
-                <h3 style="font-family: 'Space Grotesk';" class="text-[#003554] text-sm font-bold">Outro Deck</h3>
-            </div>
-            <div class="bg-linear-to-b from-[#FE9A09] to-[#FF8000] rounded-2xl p-4 cursor-pointer hover:shadow-lg transition-shadow">
-                <h3 style="font-family: 'Space Grotesk';" class="text-[#003554] text-sm font-bold">Mais um Deck</h3>
-            </div>
+            {% for deck in decks %}
+                <div class="flex items-center gap-2">
+                    <form action="" method="post" class="grow">{% csrf_token %}
+                        <button name="current_deck_id" type="submit" value="{{deck.id}}" class="w-full bg-linear-to-b from-[#FE9A09] to-[#FF8000] rounded-2xl p-4 cursor-pointer hover:shadow-lg transition-shadow">
+                            <h3 class="text-[#003554] text-sm font-bold">{{deck.name}}</h3>
+                        </button>
+                    </form>
+                    {% if deck.id == current_deck_id|add:"0" %}
+                    <form action="/decks/{{ deck.id }}/delete/" method="post" class="shrink-0">{% csrf_token %}
+                        <button type="submit" title="Excluir deck" class="p-2 rounded-lg bg-red-600 hover:bg-red-700 text-white transition-colors">
+                            <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16"></path>
+                            </svg>
+                        </button>
+                    </form>
+                    {% endif %}
+                </div>
+            {% endfor %}
         </div>
     </aside>
 
+    {% if current_deck_id == null %}
+    {% else %}
     <!-- Área de Conteúdo Principal -->
     <div id="decks-content" class="flex-1 bg-white relative overflow-hidden">
         <!-- Conteúdo dos Cards do Deck Selecionado -->
-        <div class="p-8 md:p-12">
+        <div class="p-8 h-full overflow-scroll md:p-12">
             <div class="mb-8">
-                <h1 style="font-family: 'Space Grotesk';" class="text-[#003554] text-4xl font-bold mb-2">Deck de Matemática</h1>
-                <p style="font-family: 'Space Grotesk';" class="text-[#003554] text-lg">0 cartas para revisar hoje</p>
+                <h1 class="text-[#003554] text-4xl font-bold mb-2">{{current_deck_name}}</h1>
+                <p class="text-[#003554] text-lg">0 cartas para revisar hoje</p>
             </div>
 
             <div class="mb-6">
-                <p style="font-family: 'Space Grotesk';" class="text-[#003554] text-xl font-semibold">1 carta no deck</p>
+                <p class="text-[#003554] text-xl font-semibold">1 carta no deck</p>
             </div>
 
             <!-- Grid de Cards -->
-            <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6 max-w-6xl" id="cards-grid">
+            <!-- Use auto-fit/minmax para não colocar mais colunas do que cabem -->
+            <div class="grid w-full grid-cols-[repeat(auto-fit,minmax(260px,1fr))] gap-6 max-w-6xl" id="cards-grid">
                 <!-- Card Individual -->
-                <div class="card-flip-container min-h-64 aspect-2/3 cursor-pointer" data-card-id="1" style="perspective: 1000px;">
+                {% for card in cards %}
+                <div class="card-flip-container h-98 aspect-2/3 cursor-pointer" data-card-id="{{card.id}}" style="perspective: 1000px;">
                     <div class="card-flip-inner relative w-full h-full transition-transform duration-500" style="transform-style: preserve-3d;">
                         <!-- Frente do Card -->
                         <div class="card-front absolute w-full h-full bg-linear-to-b from-[#FE9A09] to-[#FF8000] rounded-3xl p-6 shadow-lg flex flex-col justify-between" style="backface-visibility: hidden;">
-                            <div class="flex-1 flex items-center justify-center">
-                                <p style="font-family: 'Space Grotesk';" class="card-question text-[#003554] text-lg font-bold text-center">Qual a fórmula de Bhaskara?</p>
-                            </div>
+                            <div class="flex-1 flex flex-col items-center justify-center gap-4">
+                                    
+                                    <p class="card-question text-[#003554] text-lg font-bold text-center">{{card.frontText}}</p>
+                                    
+                                    
+                                </div>
                             <div class="flex justify-between items-center">
-                                <span style="font-family: 'Space Grotesk';" class="text-[#003554] text-xs font-semibold">Próxima revisão: Hoje</span>
+                                <span class="text-[#003554] text-xs font-semibold">Próxima revisão: {{card.nextReview}}</span>
                                 <div class="flex gap-2">
                                     <button class="btn-edit-card p-2 hover:bg-[#FF8000] rounded-full transition-colors z-10">
                                         <svg class="w-4 h-4 text-[#003554] pointer-events-none" fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -85,59 +100,61 @@
                         </div>
                         <!-- Verso do Card -->
                         <div class="card-back absolute w-full h-full bg-linear-to-b from-[#003554] to-[#002a42] rounded-3xl p-6 shadow-lg flex flex-col justify-center items-center" style="backface-visibility: hidden; transform: rotateY(180deg);">
-                            <p style="font-family: 'Space Grotesk';" class="card-answer text-white text-xl font-bold text-center mb-4">x = (-b ± √(b² - 4ac)) / 2a</p>
-                            <p style="font-family: 'Space Grotesk';" class="text-white text-sm text-center opacity-75">Clique novamente para voltar</p>
+                            <p class="card-answer text-white text-xl font-bold text-center mb-4">{{card.backText}}</p>
+                            <p class="text-white text-sm text-center opacity-75">Clique novamente para voltar</p>
                         </div>
                     </div>
                 </div>
+                {% endfor %}
+                
 
                 <!-- Card Adicionar Novo -->
-                <div id="btn-add-card" class="border-4 border-dashed border-gray-400 rounded-3xl p-6 shadow-lg min-h-64 flex items-center justify-center cursor-pointer hover:border-gray-500 transition-colors">
+                <div id="btn-add-card" class="border-4 border-dashed border-gray-400 rounded-3xl p-6 shadow-lg h-98 aspect-2/3 flex items-center justify-center cursor-pointer hover:border-gray-500 transition-colors">
                     <div class="text-center">
                         <div class="w-16 h-16 mx-auto mb-2 rounded-full bg-gray-400 flex items-center justify-center">
                             <svg class="w-8 h-8 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                                 <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4v16m8-8H4"></path>
                             </svg>
                         </div>
-                        <p style="font-family: 'Space Grotesk';" class="text-gray-600 font-semibold">Nova Carta</p>
+                        <p class="text-gray-600 font-semibold">Nova Carta</p>
                     </div>
                 </div>
             </div>
         </div>
     </div>
+    {% endif %}
 
 </div>
 
 <!-- Modal Adicionar Deck -->
 <div id="modal-add-deck" class="hidden fixed inset-0 bg-[#00000046]  z-50 flex items-center justify-center p-4">
     <div class="bg-white rounded-3xl p-8 max-w-md w-full shadow-2xl">
-        <h2 style="font-family: 'Space Grotesk';" class="text-[#003554] text-2xl font-bold mb-6">Criar Novo Deck</h2>
+        <h2 class="text-[#003554] text-2xl font-bold mb-6">Criar Novo Deck</h2>
         
-        <form id="form-add-deck">
+        <form id="form-add-deck" method="post" action="{% url 'criar_deck' %}">
+            {% csrf_token %}
             <div class="mb-6">
-                <label style="font-family: 'Space Grotesk';" class="text-[#003554] text-sm font-semibold mb-2 block">Nome do Deck</label>
-                <input 
-                    type="text" 
-                    id="deck-name-input" 
-                    style="font-family: 'Space Grotesk';" 
+                <label class="text-[#003554] text-sm font-semibold mb-2 block">Nome do Deck</label>
+                <input
+                    type="text"
+                    id="deck-name-input"
+                    name="name"
                     class="w-full px-4 py-3 rounded-xl border-2 border-gray-300 focus:border-[#FE9A09] focus:outline-none transition-colors"
                     placeholder="Ex: Matemática, História..."
                     required
                 />
             </div>
-            
+
             <div class="flex gap-3">
-                <button 
-                    type="button" 
+                <button
+                    type="button"
                     id="btn-cancel-deck"
-                    style="font-family: 'Space Grotesk';" 
                     class="flex-1 px-6 py-3 rounded-full border-2 border-gray-300 text-gray-700 font-semibold hover:bg-gray-100 transition-colors"
                 >
                     Cancelar
                 </button>
-                <button 
+                <button
                     type="submit"
-                    style="font-family: 'Space Grotesk';" 
                     class="flex-1 px-6 py-3 rounded-full bg-[#003554] hover:bg-[#004565] text-white font-semibold transition-colors"
                 >
                     Criar Deck
@@ -150,16 +167,18 @@
 <!-- Modal Editar Carta -->
 <div id="modal-edit-card" class="hidden fixed inset-0 bg-[#00000046] z-50 flex items-center justify-center p-4">
     <div class="bg-white rounded-3xl p-8 max-w-md w-full shadow-2xl">
-        <h2 style="font-family: 'Space Grotesk';" class="text-[#003554] text-2xl font-bold mb-6">Editar Carta</h2>
+        <h2 class="text-[#003554] text-2xl font-bold mb-6">Editar Carta</h2>
         
-        <form id="form-edit-card">
-            <input type="hidden" id="edit-card-id" />
+        <form id="form-edit-card" method="post">
+            {% csrf_token %}
+            <input type="hidden" id="edit-card-id" name="card_id" />
+            <input type="hidden" id="edit-card-deck-id" name="deck_id" value="{{ current_deck_id }}" />
             
             <div class="mb-4">
-                <label style="font-family: 'Space Grotesk';" class="text-[#003554] text-sm font-semibold mb-2 block">Pergunta (Frente)</label>
+                <label class="text-[#003554] text-sm font-semibold mb-2 block">Pergunta (Frente)</label>
                 <textarea 
                     id="edit-card-question" 
-                    style="font-family: 'Space Grotesk';" 
+                    name="frontText"
                     class="w-full px-4 py-3 rounded-xl border-2 border-gray-300 focus:border-[#FE9A09] focus:outline-none transition-colors resize-none"
                     rows="3"
                     placeholder="Digite a pergunta..."
@@ -168,32 +187,32 @@
             </div>
             
             <div class="mb-4">
-                <label style="font-family: 'Space Grotesk';" class="text-[#003554] text-sm font-semibold mb-2 block">Imagem (Frente)</label>
+                <label class="text-[#003554] text-sm font-semibold mb-2 block">Imagem (Frente)</label>
                 <input 
                     type="file" 
+                    name="imageUrl"
                     id="edit-card-image-front" 
                     accept="image/*"
-                    style="font-family: 'Space Grotesk';" 
                     class="w-full px-4 py-3 rounded-xl border-2 border-gray-300 focus:border-[#FE9A09] focus:outline-none transition-colors"
                 />
             </div>
             
             <div class="mb-4">
-                <label style="font-family: 'Space Grotesk';" class="text-[#003554] text-sm font-semibold mb-2 block">Áudio (Frente)</label>
+                <label class="text-[#003554] text-sm font-semibold mb-2 block">Áudio (Frente)</label>
                 <input 
                     type="file" 
                     id="edit-card-audio-front" 
                     accept="audio/*"
-                    style="font-family: 'Space Grotesk';" 
+                 
                     class="w-full px-4 py-3 rounded-xl border-2 border-gray-300 focus:border-[#FE9A09] focus:outline-none transition-colors"
                 />
             </div>
             
             <div class="mb-4">
-                <label style="font-family: 'Space Grotesk';" class="text-[#003554] text-sm font-semibold mb-2 block">Resposta (Verso)</label>
+                <label class="text-[#003554] text-sm font-semibold mb-2 block">Resposta (Verso)</label>
                 <textarea 
                     id="edit-card-answer" 
-                    style="font-family: 'Space Grotesk';" 
+                    name="backText"
                     class="w-full px-4 py-3 rounded-xl border-2 border-gray-300 focus:border-[#FE9A09] focus:outline-none transition-colors resize-none"
                     rows="3"
                     placeholder="Digite a resposta..."
@@ -204,14 +223,14 @@
                 <button 
                     type="button" 
                     id="btn-cancel-edit-card"
-                    style="font-family: 'Space Grotesk';" 
+                 
                     class="flex-1 px-6 py-3 rounded-full border-2 border-gray-300 text-gray-700 font-semibold hover:bg-gray-100 transition-colors"
                 >
                     Cancelar
                 </button>
                 <button 
                     type="submit"
-                    style="font-family: 'Space Grotesk';" 
+                 
                     class="flex-1 px-6 py-3 rounded-full bg-[#003554] hover:bg-[#004565] text-white font-semibold transition-colors"
                 >
                     Salvar
@@ -224,14 +243,15 @@
 <!-- Modal Adicionar Carta -->
 <div id="modal-add-card" class="hidden fixed inset-0 bg-[#00000046] z-50 flex items-center justify-center p-4">
     <div class="bg-white rounded-3xl p-8 max-w-md w-full shadow-2xl max-h-[90vh] overflow-y-auto">
-        <h2 style="font-family: 'Space Grotesk';" class="text-[#003554] text-2xl font-bold mb-6">Nova Carta</h2>
+        <h2 class="text-[#003554] text-2xl font-bold mb-6">Nova Carta</h2>
         
-        <form id="form-add-card">
+        <form id="form-add-card" method="post" action="/decks/{{ current_deck_id }}/cards/" enctype="multipart/form-data">
+            {% csrf_token %}
             <div class="mb-4">
-                <label style="font-family: 'Space Grotesk';" class="text-[#003554] text-sm font-semibold mb-2 block">Pergunta (Frente)</label>
+                <label class="text-[#003554] text-sm font-semibold mb-2 block">Pergunta (Frente)</label>
                 <textarea 
                     id="add-card-question" 
-                    style="font-family: 'Space Grotesk';" 
+                    name="frontText"
                     class="w-full px-4 py-3 rounded-xl border-2 border-gray-300 focus:border-[#FE9A09] focus:outline-none transition-colors resize-none"
                     rows="3"
                     placeholder="Digite a pergunta..."
@@ -240,32 +260,30 @@
             </div>
             
             <div class="mb-4">
-                <label style="font-family: 'Space Grotesk';" class="text-[#003554] text-sm font-semibold mb-2 block">Imagem (Frente)</label>
+                <label class="text-[#003554] text-sm font-semibold mb-2 block">Imagem (Frente)</label>
                 <input 
                     type="file" 
                     id="add-card-image-front" 
                     accept="image/*"
-                    style="font-family: 'Space Grotesk';" 
                     class="w-full px-4 py-3 rounded-xl border-2 border-gray-300 focus:border-[#FE9A09] focus:outline-none transition-colors"
                 />
             </div>
             
             <div class="mb-4">
-                <label style="font-family: 'Space Grotesk';" class="text-[#003554] text-sm font-semibold mb-2 block">Áudio (Frente)</label>
+                <label class="text-[#003554] text-sm font-semibold mb-2 block">Áudio (Frente)</label>
                 <input 
                     type="file" 
                     id="add-card-audio-front" 
                     accept="audio/*"
-                    style="font-family: 'Space Grotesk';" 
                     class="w-full px-4 py-3 rounded-xl border-2 border-gray-300 focus:border-[#FE9A09] focus:outline-none transition-colors"
                 />
             </div>
             
             <div class="mb-4">
-                <label style="font-family: 'Space Grotesk';" class="text-[#003554] text-sm font-semibold mb-2 block">Resposta (Verso)</label>
+                <label class="text-[#003554] text-sm font-semibold mb-2 block">Resposta (Verso)</label>
                 <textarea 
                     id="add-card-answer" 
-                    style="font-family: 'Space Grotesk';" 
+                    name="backText"
                     class="w-full px-4 py-3 rounded-xl border-2 border-gray-300 focus:border-[#FE9A09] focus:outline-none transition-colors resize-none"
                     rows="3"
                     placeholder="Digite a resposta..."
@@ -276,14 +294,14 @@
                 <button 
                     type="button" 
                     id="btn-cancel-add-card"
-                    style="font-family: 'Space Grotesk';" 
+                 
                     class="flex-1 px-6 py-3 rounded-full border-2 border-gray-300 text-gray-700 font-semibold hover:bg-gray-100 transition-colors"
                 >
                     Cancelar
                 </button>
                 <button 
                     type="submit"
-                    style="font-family: 'Space Grotesk';" 
+                 
                     class="flex-1 px-6 py-3 rounded-full bg-[#003554] hover:bg-[#004565] text-white font-semibold transition-colors"
                 >
                     Criar Carta
@@ -294,10 +312,10 @@
 </div>
 
 <!-- Modal Confirmar Exclusão -->
-<div id="modal-delete-card" class="hidden fixed inset-0 bg-black bg-opacity-50 z-50 flex items-center justify-center p-4">
+<div id="modal-delete-card" class="hidden fixed inset-0 bg-[#00000046] z-50 flex items-center justify-center p-4">
     <div class="bg-white rounded-3xl p-8 max-w-md w-full shadow-2xl">
-        <h2 style="font-family: 'Space Grotesk';" class="text-[#003554] text-2xl font-bold mb-4">Excluir Carta</h2>
-        <p style="font-family: 'Space Grotesk';" class="text-gray-700 mb-6">Tem certeza que deseja excluir esta carta? Esta ação não pode ser desfeita.</p>
+        <h2 class="text-[#003554] text-2xl font-bold mb-4">Excluir Carta</h2>
+        <p class="text-gray-700 mb-6">Tem certeza que deseja excluir esta carta? Esta ação não pode ser desfeita.</p>
         
         <input type="hidden" id="delete-card-id" />
         
@@ -305,7 +323,7 @@
             <button 
                 type="button" 
                 id="btn-cancel-delete-card"
-                style="font-family: 'Space Grotesk';" 
+             
                 class="flex-1 px-6 py-3 rounded-full border-2 border-gray-300 text-gray-700 font-semibold hover:bg-gray-100 transition-colors"
             >
                 Cancelar
@@ -313,7 +331,7 @@
             <button 
                 type="button"
                 id="btn-confirm-delete-card"
-                style="font-family: 'Space Grotesk';" 
+             
                 class="flex-1 px-6 py-3 rounded-full bg-red-600 hover:bg-red-700 text-white font-semibold transition-colors"
             >
                 Excluir
@@ -356,6 +374,9 @@
             const formAddDeck = document.getElementById('form-add-deck');
             const deckNameInput = document.getElementById('deck-name-input');
 
+            // Auth token injected from session
+            const AUTH_TOKEN = "{{ request.session.auth_token|default:''|escapejs }}";
+            console.log(AUTH_TOKEN)
             // Abrir modal
             btnAddDeck.addEventListener('click', function() {
                 modal.classList.remove('hidden');
@@ -390,43 +411,8 @@
                 const deckName = deckNameInput.value.trim();
                 
                 if (deckName) {
-                    // Fazer requisição AJAX para criar o deck
-                    fetch('/decks/create/', {
-                        method: 'POST',
-                        headers: {
-                            'Content-Type': 'application/json',
-                            'X-CSRFToken': getCookie('csrftoken')
-                        },
-                        body: JSON.stringify({ name: deckName })
-                    })
-                    .then(response => response.json())
-                    .then(data => {
-                        if (data.id) {
-                            // Adicionar o novo deck à lista
-                            const decksList = document.getElementById('decks-list');
-                            const emptyMessage = decksList.querySelector('p');
-                            if (emptyMessage) {
-                                emptyMessage.remove();
-                            }
-                            
-                            const newDeck = document.createElement('div');
-                            newDeck.className = 'bg-gradient-to-b from-[#FE9A09] to-[#FF8000] rounded-2xl p-4 cursor-pointer hover:shadow-lg transition-shadow';
-                            newDeck.setAttribute('data-deck-id', data.id);
-                            newDeck.innerHTML = `<h3 style="font-family: 'Space Grotesk';" class="text-[#003554] text-sm font-bold">${data.name}</h3>`;
-                            
-                            decksList.insertBefore(newDeck, decksList.firstChild);
-                            
-                            // Fechar modal
-                            modal.classList.add('hidden');
-                            formAddDeck.reset();
-                        } else if (data.error) {
-                            alert('Erro: ' + data.error);
-                        }
-                    })
-                    .catch(error => {
-                        console.error('Erro ao criar deck:', error);
-                        alert('Erro ao criar deck. Tente novamente.');
-                    });
+                    // Submit the form to let Django handle deck creation server-side
+                    formAddDeck.submit();
                 }
             });
 
@@ -453,6 +439,7 @@
             const editCardId = document.getElementById('edit-card-id');
             const editCardQuestion = document.getElementById('edit-card-question');
             const editCardAnswer = document.getElementById('edit-card-answer');
+            const currentDeckId = '{{current_deck_id}}'
 
             // Abrir modal de editar
             document.addEventListener('click', function(e) {
@@ -496,43 +483,31 @@
                     formData.append('question', question);
                     formData.append('answer', answer);
                     
-                    // Adicionar arquivos se selecionados
-                    const imageFront = document.getElementById('edit-card-image-front').files[0];
-                    const audioFront = document.getElementById('edit-card-audio-front').files[0];
-                    const imageBack = document.getElementById('edit-card-image-back').files[0];
-                    const audioBack = document.getElementById('edit-card-audio-back').files[0];
-                    
+                    // Adicionar arquivos se selecionados (checando existência dos inputs)
+                    const imageFrontEl = document.getElementById('edit-card-image-front');
+                    const audioFrontEl = document.getElementById('edit-card-audio-front');
+                    const imageBackEl = document.getElementById('edit-card-image-back');
+                    const audioBackEl = document.getElementById('edit-card-audio-back');
+
+                    const imageFront = imageFrontEl && imageFrontEl.files && imageFrontEl.files.length ? imageFrontEl.files[0] : null;
+                    const audioFront = audioFrontEl && audioFrontEl.files && audioFrontEl.files.length ? audioFrontEl.files[0] : null;
+                    const imageBack = imageBackEl && imageBackEl.files && imageBackEl.files.length ? imageBackEl.files[0] : null;
+                    const audioBack = audioBackEl && audioBackEl.files && audioBackEl.files.length ? audioBackEl.files[0] : null;
+
                     if (imageFront) formData.append('image_front', imageFront);
                     if (audioFront) formData.append('audio_front', audioFront);
                     if (imageBack) formData.append('image_back', imageBack);
                     if (audioBack) formData.append('audio_back', audioBack);
                     
-                    // TODO: Fazer requisição para API de atualizar carta
-                    fetch(`/cards/${cardId}/update/`, {
-                        method: 'PUT',
-                        headers: {
-                            'X-CSRFToken': getCookie('csrftoken')
-                        },
-                        body: formData
-                    })
-                    .then(response => response.json())
-                    .then(data => {
-                        if (data.success) {
-                            // Atualizar card na interface
-                            const cardContainer = document.querySelector(`[data-card-id="${cardId}"]`);
-                            cardContainer.querySelector('.card-question').textContent = question;
-                            cardContainer.querySelector('.card-answer').textContent = answer;
-                            
-                            modalEditCard.classList.add('hidden');
-                            formEditCard.reset();
-                        } else {
-                            alert('Erro ao atualizar carta');
-                        }
-                    })
-                    .catch(error => {
-                        console.error('Erro:', error);
-                        alert('Erro ao atualizar carta');
-                    });
+                    // Submit the edit form to the server-side view to handle update
+                    // set the form action to include the card id so the view can route
+                    // use the explicit edit endpoint
+                    formEditCard.action = `/decks/${currentDeckId}/cards/${cardId}/edit/`;
+                    // ensure the form fields reflect current values
+                    formEditCard.querySelector('#edit-card-question').value = question;
+                    formEditCard.querySelector('#edit-card-answer').value = answer;
+                    // the file inputs are already inside the form, so a normal submit will include them
+                    formEditCard.submit();
                 }
             });
 
@@ -568,29 +543,19 @@
             btnConfirmDeleteCard.addEventListener('click', function() {
                 const cardId = deleteCardId.value;
                 
-                // TODO: Fazer requisição para API de deletar carta
-                fetch(`/cards/${cardId}/delete/`, {
-                    method: 'DELETE',
-                    headers: {
-                        'X-CSRFToken': getCookie('csrftoken')
-                    }
-                })
-                .then(response => response.json())
-                .then(data => {
-                    if (data.success) {
-                        // Remover card da interface
-                        const cardContainer = document.querySelector(`[data-card-id="${cardId}"]`);
-                        cardContainer.remove();
-                        
-                        modalDeleteCard.classList.add('hidden');
-                    } else {
-                        alert('Erro ao excluir carta');
-                    }
-                })
-                .catch(error => {
-                    console.error('Erro:', error);
-                    alert('Erro ao excluir carta');
-                });
+                // Submit a small POST form to Django view to delete the card server-side
+                const tempForm = document.createElement('form');
+                // Use POST so Django receives the submission correctly
+                tempForm.method = 'post';
+                // Use explicit delete endpoint so it doesn't collide with edit URL
+                tempForm.action = `/decks/${currentDeckId}/cards/${cardId}/delete/`;
+                const csrfInput = document.createElement('input');
+                csrfInput.type = 'hidden';
+                csrfInput.name = 'csrfmiddlewaretoken';
+                csrfInput.value = getCookie('csrftoken');
+                tempForm.appendChild(csrfInput);
+                document.body.appendChild(tempForm);
+                tempForm.submit();
             });
 
             // Modal Adicionar Carta
@@ -629,92 +594,27 @@
                     formData.append('question', question);
                     formData.append('answer', answer);
                     
-                    // Adicionar arquivos se selecionados
-                    const imageFront = document.getElementById('add-card-image-front').files[0];
-                    const audioFront = document.getElementById('add-card-audio-front').files[0];
-                    const imageBack = document.getElementById('add-card-image-back').files[0];
-                    const audioBack = document.getElementById('add-card-audio-back').files[0];
-                    
+                    // Adicionar arquivos se selecionados (checando existência dos inputs)
+                    const imageFrontEl = document.getElementById('add-card-image-front');
+                    const audioFrontEl = document.getElementById('add-card-audio-front');
+                    const imageBackEl = document.getElementById('add-card-image-back');
+                    const audioBackEl = document.getElementById('add-card-audio-back');
+
+                    const imageFront = imageFrontEl && imageFrontEl.files && imageFrontEl.files.length ? imageFrontEl.files[0] : null;
+                    const audioFront = audioFrontEl && audioFrontEl.files && audioFrontEl.files.length ? audioFrontEl.files[0] : null;
+                    const imageBack = imageBackEl && imageBackEl.files && imageBackEl.files.length ? imageBackEl.files[0] : null;
+                    const audioBack = audioBackEl && audioBackEl.files && audioBackEl.files.length ? audioBackEl.files[0] : null;
+
                     if (imageFront) formData.append('image_front', imageFront);
                     if (audioFront) formData.append('audio_front', audioFront);
                     if (imageBack) formData.append('image_back', imageBack);
                     if (audioBack) formData.append('audio_back', audioBack);
                     
-                    // TODO: Fazer requisição para API de criar carta
-                    fetch('/cards/create/', {
-                        method: 'POST',
-                        headers: {
-                            'X-CSRFToken': getCookie('csrftoken')
-                        },
-                        body: formData
-                    })
-                    .then(response => response.json())
-                    .then(data => {
-                        if (data.success) {
-                            // Adicionar novo card à interface
-                            const cardsGrid = document.getElementById('cards-grid');
-                            const addCardBtn = document.getElementById('btn-add-card');
-                            
-                            const newCard = document.createElement('div');
-                            newCard.className = 'card-flip-container min-h-64 cursor-pointer';
-                            newCard.setAttribute('data-card-id', data.card_id);
-                            newCard.style.perspective = '1000px';
-                            newCard.innerHTML = `
-                                <div class="card-flip-inner relative w-full h-full transition-transform duration-500" style="transform-style: preserve-3d;">
-                                    <div class="card-front absolute w-full h-full bg-gradient-to-b from-[#FE9A09] to-[#FF8000] rounded-3xl p-6 shadow-lg flex flex-col justify-between" style="backface-visibility: hidden;">
-                                        <div class="flex-1 flex items-center justify-center">
-                                            <p style="font-family: 'Space Grotesk';" class="card-question text-[#003554] text-lg font-bold text-center">${question}</p>
-                                        </div>
-                                        <div class="flex justify-between items-center">
-                                            <span style="font-family: 'Space Grotesk';" class="text-[#003554] text-xs font-semibold">Próxima revisão: Hoje</span>
-                                            <div class="flex gap-2">
-                                                <button class="btn-edit-card p-2 hover:bg-[#FF8000] rounded-full transition-colors z-10">
-                                                    <svg class="w-4 h-4 text-[#003554] pointer-events-none" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15.232 5.232l3.536 3.536m-2.036-5.036a2.5 2.5 0 113.536 3.536L6.5 21.036H3v-3.572L16.732 3.732z"></path>
-                                                    </svg>
-                                                </button>
-                                                <button class="btn-delete-card p-2 hover:bg-[#FF8000] rounded-full transition-colors z-10">
-                                                    <svg class="w-4 h-4 text-[#003554] pointer-events-none" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16"></path>
-                                                    </svg>
-                                                </button>
-                                            </div>
-                                        </div>
-                                    </div>
-                                    <div class="card-back absolute w-full h-full bg-gradient-to-b from-[#003554] to-[#002a42] rounded-3xl p-6 shadow-lg flex flex-col justify-center items-center" style="backface-visibility: hidden; transform: rotateY(180deg);">
-                                        <p style="font-family: 'Space Grotesk';" class="card-answer text-white text-xl font-bold text-center mb-4">${answer}</p>
-                                        <p style="font-family: 'Space Grotesk';" class="text-white text-sm text-center opacity-75">Clique novamente para voltar</p>
-                                    </div>
-                                </div>
-                            `;
-                            
-                            // Inserir antes do botão de adicionar
-                            cardsGrid.insertBefore(newCard, addCardBtn);
-                            
-                            // Adicionar evento de flip ao novo card
-                            newCard.addEventListener('click', function(e) {
-                                if (e.target.closest('.btn-edit-card') || e.target.closest('.btn-delete-card')) {
-                                    return;
-                                }
-                                const inner = this.querySelector('.card-flip-inner');
-                                const currentRotation = inner.style.transform;
-                                if (currentRotation.includes('rotateY(180deg)')) {
-                                    inner.style.transform = 'rotateY(0deg)';
-                                } else {
-                                    inner.style.transform = 'rotateY(180deg)';
-                                }
-                            });
-                            
-                            modalAddCard.classList.add('hidden');
-                            formAddCard.reset();
-                        } else {
-                            alert('Erro ao criar carta');
-                        }
-                    })
-                    .catch(error => {
-                        console.error('Erro:', error);
-                        alert('Erro ao criar carta');
-                    });
+                    // Submit the add-card form to the Django view so server-side handles creation
+                    // the file inputs are part of the form, so a normal submit will include them
+                    formAddCard.querySelector('#add-card-question').value = question;
+                    formAddCard.querySelector('#add-card-answer').value = answer;
+                    formAddCard.submit();
                 }
             });
         })();

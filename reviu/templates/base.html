@@ -141,19 +141,22 @@
                     const stored = (function(){ try { return localStorage.getItem('reviu.navActive'); } catch (e) { return null; } })();
                     let activeBtn = null;
 
-                    if (stored) {
+                    // Prefer the actual current path so the selected button matches the page URL
+                    activeBtn = buttons.find(b => b.tagName === 'A' && b.getAttribute('href') === currentPath);
+
+                    // Fallback to previously stored active button if current path didn't match
+                    if (!activeBtn && stored) {
                         activeBtn = buttons.find(b => b.tagName === 'A' && b.getAttribute('href') === stored);
                     }
 
-                    if (!activeBtn) {
-                        activeBtn = buttons.find(b => b.tagName === 'A' && b.getAttribute('href') === currentPath);
-                    }
+                    // Ultimate fallback: first button
+                    if (!activeBtn) activeBtn = buttons[0];
 
-                    if (!activeBtn) {
-                        if (currentPath === "/home/") activeBtn = buttons[0];
-                        else if (currentPath === "/decks/") activeBtn = buttons[1];
-                        else activeBtn = buttons[0];
-                    }
+                    // Keep localStorage in sync with the active button
+                    try {
+                        const href = activeBtn && activeBtn.tagName === 'A' ? activeBtn.getAttribute('href') : null;
+                        if (href) localStorage.setItem('reviu.navActive', href);
+                    } catch (e) {}
 
                     if (activeBtn) moveBgTo(activeBtn);
                 }

@@ -36,11 +36,18 @@
                 {% endfor %}
 
 
-                <div id="card" class="h-full aspect-2/3 bg-[#bebebe] border-2 border-dashed border-[#01375683] rounded-3xl p-6 flex flex-col justify-between snap-center">
-                    <div class="flex justify-center items-center h-full">
-                        <img src="{% static 'resouces/add-card.svg' %}" alt="User" class="size-16 opacity-50">
+                <a href="{% url 'decks' %}">
+                    <div id="btn-add-card" class="border-4 border-dashed border-gray-400 rounded-3xl p-6 shadow-lg h-98 aspect-2/3 flex items-center justify-center cursor-pointer hover:border-gray-500 transition-colors">
+                        <div class="text-center">
+                            <div class="w-16 h-16 mx-auto mb-2 rounded-full bg-gray-400 flex items-center justify-center">
+                                <svg class="w-8 h-8 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4v16m8-8H4"></path>
+                                </svg>
+                            </div>
+                            <p class="text-gray-600 font-semibold">Nova Carta</p>
+                        </div>
                     </div>
-                </div>
+                </a>
             </div>
         </div>
 
@@ -50,4 +57,29 @@
 {% endblock body %}
 
 {% block extra_body %}
+    <script>
+        (function(){
+            // When the 'Nova Carta' card is clicked on the home page, trigger
+            // the decks nav button click so the nav-bg moves, then let the
+            // nav handler perform the navigation.
+            const addCardBtn = document.getElementById('btn-add-card');
+            if (!addCardBtn) return;
+
+            const decksHref = "{% url 'decks' %}";
+
+            addCardBtn.closest('a')?.addEventListener('click', function(e){
+                e.preventDefault();
+
+                // Find the decks nav button and dispatch a click on it so the
+                // nav animation takes place and navigation is handled there.
+                const navDeckBtn = document.querySelector(`#main-nav a.nav-btn[href='${decksHref}']`);
+                if (navDeckBtn) {
+                    navDeckBtn.dispatchEvent(new MouseEvent('click', { bubbles: true, cancelable: true }));
+                } else {
+                    // Fallback: navigate directly
+                    window.location.href = decksHref;
+                }
+            });
+        })();
+    </script>
 {% endblock extra_body %}
