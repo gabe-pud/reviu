@@ -196,3 +196,6 @@ def deletar_card(request, deck_id, card_id):
     print(dados_api)
     return redirect("decks")
 
+
+def card_review(request):
+    return render(request, 'card-review/card-review.html')
