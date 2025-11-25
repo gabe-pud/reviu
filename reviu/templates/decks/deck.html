@@ -61,16 +61,14 @@
             <div class="mb-8">
                 <h1 class="text-[#003554] text-4xl font-bold mb-2">{{current_deck_name}}</h1>
                 <p class="text-[#003554] text-lg">0 cartas para revisar hoje</p>
-            </div>
-
-            <div class="mb-6">
-                <p style="font-family: 'Space Grotesk';" class="text-[#003554] text-xl font-semibold">1 carta no deck</p>
-                <!-- Botão para entrar no card-review -->
-                <div class="flex justify-end mt-2">
-                    <a href="/card-review/" class="px-6 py-2 bg-[#003554] text-white rounded-full font-semibold shadow hover:bg-[#045685] transition-colors" style="font-family: 'Space Grotesk';">
-                        Revisar Cartas
-                    </a>
+                {% if current_deck_id %}
+                <div class="mt-4">
+                    <form id="form-start-review" method="post" action="{% url 'card_review' deck_id=current_deck_id %}">
+                        {% csrf_token %}
+                        <button type="submit" name="deck_id" value="{{ current_deck_id }}" class="px-4 py-2 rounded-full bg-[#003554] text-white font-semibold mt-2">Iniciar Revisão</button>
+                    </form>
                 </div>
+                {% endif %}
             </div>
 
             <!-- Grid de Cards -->

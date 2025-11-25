@@ -47,6 +47,7 @@ def main_page(request):
                     pass
 
         deck_simplificado = {
+            'id':deck['id'],
             'name': deck['name'],
             'quantidade_cards': total_cards,
             'cards_a_revisar': cards_a_revisar_hoje,

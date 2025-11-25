@@ -22,17 +22,20 @@
 
             <div id="card-select" class="w-full grow px-3 mb-3 flex gap-3 overflow-x-scroll snap-x not-md:scrollbar-hidden">
                 {% for deck in decks %}
-                    <div id="card" class="h-full aspect-2/3 bg-[#FE9A09] rounded-3xl p-6 flex flex-col justify-between snap-center">
-                        <div class="flex justify-between gap-3">
-                            <p class="text-lg sm:text-2xl text-[#013756] font-bold">{{ deck.name }}</p>
-                            <div class="flex items-center">
-                                <p class="text-lg sm:text-xl text-[#013756] text-center">{{ deck.quantidade_cards }} cartas</p>
+                    <form id="form-start-review" method="post" action="{% url 'card_review' deck_id=deck.id|add:'0' %}">
+                        {% csrf_token %}
+                        <button type="submit" name="deck_id" value="{{ deck.id }}" id="card" class="h-full aspect-2/3 bg-linear-to-b from-[#FE9A09] to-[#FF8000] rounded-3xl p-6 flex flex-col justify-between snap-center">
+                            <div class="flex justify-between gap-3">
+                                <p class="text-lg sm:text-2xl text-[#013756] font-bold">{{ deck.name }}</p>
+                                <div class="flex items-center">
+                                    <p class="text-lg sm:text-xl text-[#013756] text-center">{{ deck.quantidade_cards }} cartas</p>
+                                </div>
                             </div>
-                        </div>
-                        <div class="text-lg sm:text-xl text-center font-semibold text-[#013756]">
-                            <p><span>{{ deck.cards_a_revisar }}</span> cartas pendentes</p>
-                        </div>
-                    </div>
+                            <div class="text-lg sm:text-xl text-center font-semibold text-[#013756]">
+                                <p><span>{{ deck.cards_a_revisar }}</span> cartas pendentes</p>
+                            </div>
+                        </button>
+                    </form>
                 {% endfor %}
 
 

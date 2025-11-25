@@ -71,7 +71,6 @@ def decks_view(request):
     else:
         cards = []
 
-    print(decks)
     context = {
         "decks":decks,
         "current_deck_id": current_deck_id,
@@ -82,6 +81,9 @@ def decks_view(request):
 
 
 def criar_deck(request):
+    if request.session.get('auth_token') == None:
+        return redirect('login')
+    
     headers={
         "Authorization":request.session.get('auth_token')
     }
@@ -98,13 +100,14 @@ def criar_deck(request):
     except requests.exceptions.RequestException as e:
         print(f"Erro ao buscar decks da API: {e}")
         dados_api = {'cards': []}
-    
-    print(dados_api)
 
     return redirect("decks")
 
 
 def deletar_deck(request,deck_id):
+    if request.session.get('auth_token') == None:
+        return redirect('login')
+    
     url = "http://localhost:8080/decks/"+str(deck_id)
 
     headers={
@@ -119,13 +122,14 @@ def deletar_deck(request,deck_id):
     except requests.exceptions.RequestException as e:
         print(f"Erro ao buscar decks da API: {e}")
         dados_api = {'cards': []}
-    
-    print(dados_api)
 
     return redirect("decks")
 
 
 def criar_card(request, deck_id):
+    if request.session.get('auth_token') == None:
+        return redirect('login')
+    
     url = "http://localhost:8080/decks/"+str(deck_id)+"/cards"
 
     headers={
@@ -145,13 +149,14 @@ def criar_card(request, deck_id):
     except requests.exceptions.RequestException as e:
         print(f"Erro ao buscar decks da API: {e}")
         dados_api = {'cards': []}
-    
-    print(dados_api)
 
     return redirect("decks")
 
 
 def alterar_card(request, deck_id, card_id):
+    if request.session.get('auth_token') == None:
+        return redirect('login')
+    
     url = "http://localhost:8080/decks/"+str(deck_id)+"/cards/"+str(card_id)
 
     headers={
@@ -171,13 +176,14 @@ def alterar_card(request, deck_id, card_id):
     except requests.exceptions.RequestException as e:
         print(f"Erro ao buscar decks da API: {e}")
         dados_api = {'cards': []}
-    
-    print(dados_api)
 
     return redirect("decks")
 
 
 def deletar_card(request, deck_id, card_id):
+    if request.session.get('auth_token') == None:
+        return redirect('login')
+    
     url = "http://localhost:8080/decks/"+str(deck_id)+"/cards/"+str(card_id)
 
     headers={
@@ -192,10 +198,68 @@ def deletar_card(request, deck_id, card_id):
     except requests.exceptions.RequestException as e:
         print(f"Erro ao buscar decks da API: {e}")
         dados_api = {'cards': []}
-    
-    print(dados_api)
+        
     return redirect("decks")
 
 
-def card_review(request):
-    return render(request, 'card-review/card-review.html')
+def card_review(request, deck_id):
+    if request.session.get('auth_token') is None:
+        return redirect('login')
+
+    API_BASE = 'http://localhost:8080'
+    headers = {}
+    token = request.session.get('auth_token')
+    if token:
+        headers['Authorization'] = token
+
+    try:
+        if request.method == 'POST':
+            card_id = request.POST.get('card_id')
+            evaluation = request.POST.get('evaluation') or request.POST.get('rating')
+
+            payload = {}
+            if evaluation is not None:
+                payload['evaluation'] = evaluation
+
+            review_url = f"{API_BASE}/decks/{deck_id}/cards/{card_id}/review"
+            try:
+                resp = requests.post(review_url, headers=headers, json=payload, timeout=10)
+                resp.raise_for_status()
+            except requests.exceptions.RequestException as e:
+                print(f"Erro ao enviar review para API: {e}")
+
+            return redirect('card_review', deck_id=deck_id)
+
+        due_url = f"{API_BASE}/decks/{deck_id}/cards/due"
+        try:
+            resp = requests.get(due_url, headers=headers, timeout=10)
+            resp.raise_for_status()
+            cards_api = resp.json() or []
+        except requests.exceptions.RequestException as e:
+            print(f"Erro ao buscar cards pendentes da API: {e}")
+            cards_api = []
+
+        next_card = None
+        if isinstance(cards_api, list) and len(cards_api) > 0:
+            i = cards_api[0]
+            next_card = {
+                'id': i.get('id'),
+                'frontText': i.get('frontText'),
+                'backText': i.get('backText'),
+                'imageUrl': i.get('imageUrl'),
+                'audioUrl': i.get('audioUrl'),
+                'raw': i,
+            }
+
+        return render(request, 'card-review/card-review.html', {
+            'card': next_card,
+            'deck_id': deck_id,
+        })
+
+    except Exception as e:
+        print(f"Erro inesperado em card_review: {e}")
+        return render(request, 'card-review/card-review.html', {
+            'card': None,
+            'deck_id': deck_id,
+            'error': 'Erro ao comunicar com o serviço de revisão.'
+        })

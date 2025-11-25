@@ -17,7 +17,6 @@ def register_view(request):
         }
 
         info = requests.post('http://localhost:8080/auth/register', json=data)
-        print(info)
 
         if info.status_code == 200 or info.status_code == 201:
             print("Registro bem-sucedido:", info.text)
@@ -38,7 +37,6 @@ def login_view(request):
         }
 
         info = requests.post('http://localhost:8080/auth/login', json=data)
-        print(info)
 
         if info.status_code == 200 or info.status_code == 201:
             print("Login bem-sucedido:", info.text)
