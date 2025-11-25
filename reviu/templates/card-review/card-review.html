@@ -1,0 +1,117 @@
+{% extends 'base.html' %}
+{% load static %}
+
+{% block title %}Revisar Cards - Reviu{% endblock %}
+
+{% block body %}
+<div class="min-h-screen bg-white flex flex-col items-center justify-center p-4 relative overflow-hidden">
+    <!-- Elefante de fundo tela inteira -->
+    <img src="{% static 'resouces/elefante-grandao.png' %}" alt="Elefante" class="pointer-events-none select-none fixed inset-0 w-full h-full object-cover opacity-30 z-0" style="filter: blur(0.5px);" />
+    
+
+    <!-- Botão Voltar para o Deck no topo à direita -->
+    <div class="w-full max-w-2xl flex justify-end mb-2 z-30 relative">
+        <a href="{% url 'decks' %}" class="px-6 py-2 bg-[#003554] text-white rounded-full font-semibold shadow hover:bg-[#045685] transition-colors" style="font-family: 'Space Grotesk';">
+            Voltar para o Deck
+        </a>
+    </div>
+    <!-- Card de Revisão com Flip -->
+    <div class="w-full max-w-2xl mb-8 h-96" style="perspective: 1000px;">
+        <div id="review-card" class="relative w-full h-full transition-transform duration-500 cursor-pointer" style="transform-style: preserve-3d;">
+            
+            <!-- Frente do Card (Pergunta) -->
+            <div class="card-front absolute w-full h-full bg-gradient-to-b from-[#FE9A09] to-[#FF8000] rounded-3xl shadow-xl p-8 flex flex-col justify-center items-center" style="backface-visibility: hidden;">
+                <p style="font-family: 'Space Grotesk';" class="text-2xl text-[#003554] font-bold text-center" id="card-question">
+                    Como fala casa em ingles? 
+                </p>
+                <p style="font-family: 'Space Grotesk';" class="text-center text-[#003554] mt-6 opacity-75 text-sm">
+                    Clique para ver a resposta
+                </p>
+            </div>
+            
+            <!-- Verso do Card (Resposta) -->
+            <div class="card-back absolute w-full h-full bg-gradient-to-b from-[#003554] to-[#002a42] rounded-3xl shadow-xl p-8 flex flex-col justify-center items-center" style="backface-visibility: hidden; transform: rotateY(180deg);">
+                <p style="font-family: 'Space Grotesk';" class="text-3xl text-white font-bold text-center mb-4" id="card-answer">
+                    House
+                </p>
+                <p style="font-family: 'Space Grotesk';" class="text-center text-white opacity-75 text-sm">
+                    Avalie sua resposta abaixo
+                </p>
+            </div>
+            
+        </div>
+    </div>
+    
+    <!-- Botões de Avaliação Embaixo -->
+    <div id="rating-buttons" class="w-full max-w-2xl grid grid-cols-5 gap-4 mb-8 hidden z-40">
+        <button 
+            onclick="rateCard('errei')"
+            style="font-family: 'Space Grotesk';"
+            class="px-6 py-4 bg-red-600 text-white font-bold rounded-xl hover:bg-red-700 transition-colors">
+            <div class="text-xs mb-1">Errei</div>
+        </button>
+        <button 
+            onclick="rateCard('dificil')"
+            style="font-family: 'Space Grotesk';"
+            class="px-6 py-4 bg-orange-500 text-white font-bold rounded-xl hover:bg-orange-600 transition-colors">
+            <div class="text-xs mb-1">Difícil</div>
+        </button>
+        <button 
+            onclick="rateCard('normal')"
+            style="font-family: 'Space Grotesk';"
+            class="px-6 py-4 bg-yellow-400 text-[#003554] font-bold rounded-xl hover:bg-yellow-500 transition-colors">
+            <div class="text-xs mb-1">Normal</div>
+        </button>
+        <button 
+            onclick="rateCard('facil')"
+            style="font-family: 'Space Grotesk';"
+            class="px-6 py-4 bg-green-600 text-white font-bold rounded-xl hover:bg-green-700 transition-colors">
+            <div class="text-xs mb-1">Fácil</div>
+        </button>
+        <button 
+            onclick="rateCard('muito_facil')"
+            style="font-family: 'Space Grotesk';"
+            class="px-6 py-4 bg-blue-600 text-white font-bold rounded-xl hover:bg-blue-700 transition-colors">
+            <div class="text-xs mb-1">Muito fácil</div>
+        </button>
+    </div>
+    
+    <!-- Botão Voltar para o Deck removido do rodapé -->
+    
+</div>
+{% endblock %}
+
+{% block extra_body %}
+<script>
+    const reviewCard = document.getElementById('review-card');
+    const ratingButtons = document.getElementById('rating-buttons');
+    let isFlipped = false;
+
+    // Flip ao clicar no card
+    reviewCard.addEventListener('click', function() {
+        if (!isFlipped) {
+            reviewCard.style.transform = 'rotateY(180deg)';
+            isFlipped = true;
+            ratingButtons.classList.remove('hidden');
+        } else {
+            reviewCard.style.transform = 'rotateY(0deg)';
+            isFlipped = false;
+            ratingButtons.classList.add('hidden');
+        }
+    });
+
+    function rateCard(rating) {
+        console.log('Card avaliado como:', rating);
+        // Aqui você pode adicionar lógica para enviar a avaliação ao backend
+        // e carregar o próximo card
+
+        // Reset do card para o próximo
+        reviewCard.style.transform = 'rotateY(0deg)';
+        isFlipped = false;
+        ratingButtons.classList.add('hidden');
+
+        // Exemplo: recarregar próximo card
+        // window.location.reload();
+    }
+</script>
+{% endblock %}

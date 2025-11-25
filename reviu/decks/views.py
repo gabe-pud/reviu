@@ -4,3 +4,6 @@ from django.shortcuts import render
 
 def decks_view(request):
     return render(request, 'decks/deck.html')
+
+def card_review(request):
+    return render(request, 'card-review/card-review.html')
