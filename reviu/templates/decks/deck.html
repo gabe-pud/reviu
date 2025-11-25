@@ -6,22 +6,338 @@
 {% endblock %}
 
 {% block body %}
+<div class="absolute right-0 top-0 pointer-events-none z-50">
+        <img src="{% static 'resouces/decko.svg' %}" alt="">
+    </div>
+<div class="h-screen flex">
+
 <nav id="main-nav" class="absolute flex justify-between px-16 pb-4 w-full bottom-0 z-20 bg-[#003554]
-        md:static md:left-0 md:bottom-auto md:flex-col md:pr-4 md:pl-2 md:py-16 md:w-fit md:justify-start md:gap-5">
-            <!-- fundo móvel atrás do botão (posicionado via JS) -->
-            <img id="nav-bg" class="absolute left-9 -top-[33.5px] w-28 pointer-events-none transition-all duration-300 ease-in-out z-10
-            md:rotate-90 md:left-4.75" src="{% static 'resouces/nav-button-bg.svg' %}" alt="">
-    
-            <a href="#" class="nav-btn size-14 p-3 rounded-full transition-transform duration-300 ease-in-out z-30 -translate-y-[29px] md:translate-x-11" role="button" aria-current="page">
-                <img src="{% static 'resouces/home.svg' %}" alt="Home">
-            </a>
-            <a href="#" class="nav-btn size-14 p-3 rounded-full transition-transform duration-300 ease-in-out z-30" role="button">
-                <img src="{% static 'resouces/cards.svg' %}" alt="Cards">
-            </a>
-            <a href="#" class="nav-btn size-14 p-3 rounded-full transition-transform duration-300 ease-in-out z-30" role="button">
-                <img src="{% static 'resouces/user.svg' %}" alt="User">
-            </a>
-        </nav>
+md:static md:left-0 md:bottom-auto md:flex-col md:pr-4 md:pl-2 md:py-16 md:w-fit md:justify-start md:gap-5">
+    <img id="nav-bg" class="absolute left-9 -top-[33.5px] w-28 pointer-events-none transition-all duration-300 ease-in-out z-10
+    md:rotate-90 md:left-4.75 md:top-13.5" src="{% static 'resouces/nav-button-bg.svg' %}" alt="">
+
+    <a href="#" data-page="home" class="nav-btn size-14 p-3 rounded-full transition-transform duration-300 ease-in-out z-30 -translate-y-[29px] md:translate-y-0 md:translate-x-11" role="button" aria-current="page">
+        <img src="{% static 'resouces/home.svg' %}" alt="Home">
+    </a>
+    <a href="#" data-page="decks" class="nav-btn size-14 p-3 rounded-full transition-transform duration-300 ease-in-out z-30" role="button">
+        <img src="{% static 'resouces/cards.svg' %}" alt="Cards">
+    </a>
+    <a href="#" data-page="user" class="nav-btn size-14 p-3 rounded-full transition-transform duration-300 ease-in-out z-30" role="button">
+        <img src="{% static 'resouces/user.svg' %}" alt="User">
+    </a>
+</nav>
+
+    <!-- Decks Sidebar (Escondida por padrão, visível no desktop quando decks estiver ativo) -->
+    <aside id="decks-sidebar" class="hidden md:flex-col bg-white w-64 border-r border-gray-200 p-6 md:ml-8">
+        <!-- Header com Título e Botões -->
+        <div class="flex items-center justify-between mb-6">
+            <h2 style="font-family: 'Space Grotesk';" class="text-[#003554] text-2xl font-bold">Decks</h2>
+            <div class="flex gap-2">
+                <button class="p-2 hover:bg-gray-100 rounded-full transition-colors">
+                    <svg class="w-5 h-5 text-[#003554]" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z"></path>
+                    </svg>
+                </button>
+                <button id="btn-add-deck" class="p-2 bg-[#003554] hover:bg-[#004565] rounded-full transition-colors">
+                    <svg class="w-5 h-5 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4v16m8-8H4"></path>
+                    </svg>
+                </button>
+            </div>
+        </div>
+
+        <!-- Lista de Decks -->
+        <div class="flex-1 overflow-y-auto space-y-3">
+            <div class="bg-gradient-to-b from-[#FE9A09] to-[#FF8000] rounded-2xl p-4 cursor-pointer hover:shadow-lg transition-shadow">
+                <h3 style="font-family: 'Space Grotesk';" class="text-[#003554] text-sm font-bold">Deck de Matemática</h3>
+            </div>
+            <div class="bg-gradient-to-b from-[#FE9A09] to-[#FF8000] rounded-2xl p-4 cursor-pointer hover:shadow-lg transition-shadow">
+                <h3 style="font-family: 'Space Grotesk';" class="text-[#003554] text-sm font-bold">Outro Deck</h3>
+            </div>
+            <div class="bg-gradient-to-b from-[#FE9A09] to-[#FF8000] rounded-2xl p-4 cursor-pointer hover:shadow-lg transition-shadow">
+                <h3 style="font-family: 'Space Grotesk';" class="text-[#003554] text-sm font-bold">Mais um Deck</h3>
+            </div>
+        </div>
+    </aside>
+
+    <!-- Área de Conteúdo Principal -->
+    <div id="decks-content" class="flex-1 bg-white relative overflow-hidden hidden">
+        <!-- Conteúdo dos Cards do Deck Selecionado -->
+        <div class="p-8 md:p-12">
+            <div class="mb-8">
+                <h1 style="font-family: 'Space Grotesk';" class="text-[#003554] text-4xl font-bold mb-2">Deck de Matemática</h1>
+                <p style="font-family: 'Space Grotesk';" class="text-[#003554] text-lg">0 cartas para revisar hoje</p>
+            </div>
+
+            <div class="mb-6">
+                <p style="font-family: 'Space Grotesk';" class="text-[#003554] text-xl font-semibold">1 carta no deck</p>
+            </div>
+
+            <!-- Grid de Cards -->
+            <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6 max-w-6xl" id="cards-grid">
+                <!-- Card Individual -->
+                <div class="card-flip-container min-h-64 cursor-pointer" data-card-id="1" style="perspective: 1000px;">
+                    <div class="card-flip-inner relative w-full h-full transition-transform duration-500" style="transform-style: preserve-3d;">
+                        <!-- Frente do Card -->
+                        <div class="card-front absolute w-full h-full bg-gradient-to-b from-[#FE9A09] to-[#FF8000] rounded-3xl p-6 shadow-lg flex flex-col justify-between" style="backface-visibility: hidden;">
+                            <div class="flex-1 flex items-center justify-center">
+                                <p style="font-family: 'Space Grotesk';" class="card-question text-[#003554] text-lg font-bold text-center">Qual a fórmula de Bhaskara?</p>
+                            </div>
+                            <div class="flex justify-between items-center">
+                                <span style="font-family: 'Space Grotesk';" class="text-[#003554] text-xs font-semibold">Próxima revisão: Hoje</span>
+                                <div class="flex gap-2">
+                                    <button class="btn-edit-card p-2 hover:bg-[#FF8000] rounded-full transition-colors z-10">
+                                        <svg class="w-4 h-4 text-[#003554] pointer-events-none" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15.232 5.232l3.536 3.536m-2.036-5.036a2.5 2.5 0 113.536 3.536L6.5 21.036H3v-3.572L16.732 3.732z"></path>
+                                        </svg>
+                                    </button>
+                                    <button class="btn-delete-card p-2 hover:bg-[#FF8000] rounded-full transition-colors z-10">
+                                        <svg class="w-4 h-4 text-[#003554] pointer-events-none" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16"></path>
+                                        </svg>
+                                    </button>
+                                </div>
+                            </div>
+                        </div>
+                        <!-- Verso do Card -->
+                        <div class="card-back absolute w-full h-full bg-gradient-to-b from-[#003554] to-[#002a42] rounded-3xl p-6 shadow-lg flex flex-col justify-center items-center" style="backface-visibility: hidden; transform: rotateY(180deg);">
+                            <p style="font-family: 'Space Grotesk';" class="card-answer text-white text-xl font-bold text-center mb-4">x = (-b ± √(b² - 4ac)) / 2a</p>
+                            <p style="font-family: 'Space Grotesk';" class="text-white text-sm text-center opacity-75">Clique novamente para voltar</p>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Card Adicionar Novo -->
+                <div id="btn-add-card" class="border-4 border-dashed border-gray-400 rounded-3xl p-6 shadow-lg min-h-64 flex items-center justify-center cursor-pointer hover:border-gray-500 transition-colors">
+                    <div class="text-center">
+                        <div class="w-16 h-16 mx-auto mb-2 rounded-full bg-gray-400 flex items-center justify-center">
+                            <svg class="w-8 h-8 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4v16m8-8H4"></path>
+                            </svg>
+                        </div>
+                        <p style="font-family: 'Space Grotesk';" class="text-gray-600 font-semibold">Nova Carta</p>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+</div>
+
+<!-- Modal Adicionar Deck -->
+<div id="modal-add-deck" class="hidden fixed inset-0 bg-[#00000046]  z-50 flex items-center justify-center p-4">
+    <div class="bg-white rounded-3xl p-8 max-w-md w-full shadow-2xl">
+        <h2 style="font-family: 'Space Grotesk';" class="text-[#003554] text-2xl font-bold mb-6">Criar Novo Deck</h2>
+        
+        <form id="form-add-deck">
+            <div class="mb-6">
+                <label style="font-family: 'Space Grotesk';" class="text-[#003554] text-sm font-semibold mb-2 block">Nome do Deck</label>
+                <input 
+                    type="text" 
+                    id="deck-name-input" 
+                    style="font-family: 'Space Grotesk';" 
+                    class="w-full px-4 py-3 rounded-xl border-2 border-gray-300 focus:border-[#FE9A09] focus:outline-none transition-colors"
+                    placeholder="Ex: Matemática, História..."
+                    required
+                />
+            </div>
+            
+            <div class="flex gap-3">
+                <button 
+                    type="button" 
+                    id="btn-cancel-deck"
+                    style="font-family: 'Space Grotesk';" 
+                    class="flex-1 px-6 py-3 rounded-full border-2 border-gray-300 text-gray-700 font-semibold hover:bg-gray-100 transition-colors"
+                >
+                    Cancelar
+                </button>
+                <button 
+                    type="submit"
+                    style="font-family: 'Space Grotesk';" 
+                    class="flex-1 px-6 py-3 rounded-full bg-[#003554] hover:bg-[#004565] text-white font-semibold transition-colors"
+                >
+                    Criar Deck
+                </button>
+            </div>
+        </form>
+    </div>
+</div>
+
+<!-- Modal Editar Carta -->
+<div id="modal-edit-card" class="hidden fixed inset-0 bg-[#00000046] z-50 flex items-center justify-center p-4">
+    <div class="bg-white rounded-3xl p-8 max-w-md w-full shadow-2xl">
+        <h2 style="font-family: 'Space Grotesk';" class="text-[#003554] text-2xl font-bold mb-6">Editar Carta</h2>
+        
+        <form id="form-edit-card">
+            <input type="hidden" id="edit-card-id" />
+            
+            <div class="mb-4">
+                <label style="font-family: 'Space Grotesk';" class="text-[#003554] text-sm font-semibold mb-2 block">Pergunta (Frente)</label>
+                <textarea 
+                    id="edit-card-question" 
+                    style="font-family: 'Space Grotesk';" 
+                    class="w-full px-4 py-3 rounded-xl border-2 border-gray-300 focus:border-[#FE9A09] focus:outline-none transition-colors resize-none"
+                    rows="3"
+                    placeholder="Digite a pergunta..."
+                    required
+                ></textarea>
+            </div>
+            
+            <div class="mb-4">
+                <label style="font-family: 'Space Grotesk';" class="text-[#003554] text-sm font-semibold mb-2 block">Imagem (Frente)</label>
+                <input 
+                    type="file" 
+                    id="edit-card-image-front" 
+                    accept="image/*"
+                    style="font-family: 'Space Grotesk';" 
+                    class="w-full px-4 py-3 rounded-xl border-2 border-gray-300 focus:border-[#FE9A09] focus:outline-none transition-colors"
+                />
+            </div>
+            
+            <div class="mb-4">
+                <label style="font-family: 'Space Grotesk';" class="text-[#003554] text-sm font-semibold mb-2 block">Áudio (Frente)</label>
+                <input 
+                    type="file" 
+                    id="edit-card-audio-front" 
+                    accept="audio/*"
+                    style="font-family: 'Space Grotesk';" 
+                    class="w-full px-4 py-3 rounded-xl border-2 border-gray-300 focus:border-[#FE9A09] focus:outline-none transition-colors"
+                />
+            </div>
+            
+            <div class="mb-4">
+                <label style="font-family: 'Space Grotesk';" class="text-[#003554] text-sm font-semibold mb-2 block">Resposta (Verso)</label>
+                <textarea 
+                    id="edit-card-answer" 
+                    style="font-family: 'Space Grotesk';" 
+                    class="w-full px-4 py-3 rounded-xl border-2 border-gray-300 focus:border-[#FE9A09] focus:outline-none transition-colors resize-none"
+                    rows="3"
+                    placeholder="Digite a resposta..."
+                    required
+                ></textarea>
+            </div>
+            <div class="flex gap-3">
+                <button 
+                    type="button" 
+                    id="btn-cancel-edit-card"
+                    style="font-family: 'Space Grotesk';" 
+                    class="flex-1 px-6 py-3 rounded-full border-2 border-gray-300 text-gray-700 font-semibold hover:bg-gray-100 transition-colors"
+                >
+                    Cancelar
+                </button>
+                <button 
+                    type="submit"
+                    style="font-family: 'Space Grotesk';" 
+                    class="flex-1 px-6 py-3 rounded-full bg-[#003554] hover:bg-[#004565] text-white font-semibold transition-colors"
+                >
+                    Salvar
+                </button>
+            </div>
+        </form>
+    </div>
+</div>
+
+<!-- Modal Adicionar Carta -->
+<div id="modal-add-card" class="hidden fixed inset-0 bg-[#00000046] z-50 flex items-center justify-center p-4">
+    <div class="bg-white rounded-3xl p-8 max-w-md w-full shadow-2xl max-h-[90vh] overflow-y-auto">
+        <h2 style="font-family: 'Space Grotesk';" class="text-[#003554] text-2xl font-bold mb-6">Nova Carta</h2>
+        
+        <form id="form-add-card">
+            <div class="mb-4">
+                <label style="font-family: 'Space Grotesk';" class="text-[#003554] text-sm font-semibold mb-2 block">Pergunta (Frente)</label>
+                <textarea 
+                    id="add-card-question" 
+                    style="font-family: 'Space Grotesk';" 
+                    class="w-full px-4 py-3 rounded-xl border-2 border-gray-300 focus:border-[#FE9A09] focus:outline-none transition-colors resize-none"
+                    rows="3"
+                    placeholder="Digite a pergunta..."
+                    required
+                ></textarea>
+            </div>
+            
+            <div class="mb-4">
+                <label style="font-family: 'Space Grotesk';" class="text-[#003554] text-sm font-semibold mb-2 block">Imagem (Frente)</label>
+                <input 
+                    type="file" 
+                    id="add-card-image-front" 
+                    accept="image/*"
+                    style="font-family: 'Space Grotesk';" 
+                    class="w-full px-4 py-3 rounded-xl border-2 border-gray-300 focus:border-[#FE9A09] focus:outline-none transition-colors"
+                />
+            </div>
+            
+            <div class="mb-4">
+                <label style="font-family: 'Space Grotesk';" class="text-[#003554] text-sm font-semibold mb-2 block">Áudio (Frente)</label>
+                <input 
+                    type="file" 
+                    id="add-card-audio-front" 
+                    accept="audio/*"
+                    style="font-family: 'Space Grotesk';" 
+                    class="w-full px-4 py-3 rounded-xl border-2 border-gray-300 focus:border-[#FE9A09] focus:outline-none transition-colors"
+                />
+            </div>
+            
+            <div class="mb-4">
+                <label style="font-family: 'Space Grotesk';" class="text-[#003554] text-sm font-semibold mb-2 block">Resposta (Verso)</label>
+                <textarea 
+                    id="add-card-answer" 
+                    style="font-family: 'Space Grotesk';" 
+                    class="w-full px-4 py-3 rounded-xl border-2 border-gray-300 focus:border-[#FE9A09] focus:outline-none transition-colors resize-none"
+                    rows="3"
+                    placeholder="Digite a resposta..."
+                    required
+                ></textarea>
+            </div>
+            <div class="flex gap-3">
+                <button 
+                    type="button" 
+                    id="btn-cancel-add-card"
+                    style="font-family: 'Space Grotesk';" 
+                    class="flex-1 px-6 py-3 rounded-full border-2 border-gray-300 text-gray-700 font-semibold hover:bg-gray-100 transition-colors"
+                >
+                    Cancelar
+                </button>
+                <button 
+                    type="submit"
+                    style="font-family: 'Space Grotesk';" 
+                    class="flex-1 px-6 py-3 rounded-full bg-[#003554] hover:bg-[#004565] text-white font-semibold transition-colors"
+                >
+                    Criar Carta
+                </button>
+            </div>
+        </form>
+    </div>
+</div>
+
+<!-- Modal Confirmar Exclusão -->
+<div id="modal-delete-card" class="hidden fixed inset-0 bg-black bg-opacity-50 z-50 flex items-center justify-center p-4">
+    <div class="bg-white rounded-3xl p-8 max-w-md w-full shadow-2xl">
+        <h2 style="font-family: 'Space Grotesk';" class="text-[#003554] text-2xl font-bold mb-4">Excluir Carta</h2>
+        <p style="font-family: 'Space Grotesk';" class="text-gray-700 mb-6">Tem certeza que deseja excluir esta carta? Esta ação não pode ser desfeita.</p>
+        
+        <input type="hidden" id="delete-card-id" />
+        
+        <div class="flex gap-3">
+            <button 
+                type="button" 
+                id="btn-cancel-delete-card"
+                style="font-family: 'Space Grotesk';" 
+                class="flex-1 px-6 py-3 rounded-full border-2 border-gray-300 text-gray-700 font-semibold hover:bg-gray-100 transition-colors"
+            >
+                Cancelar
+            </button>
+            <button 
+                type="button"
+                id="btn-confirm-delete-card"
+                style="font-family: 'Space Grotesk';" 
+                class="flex-1 px-6 py-3 rounded-full bg-red-600 hover:bg-red-700 text-white font-semibold transition-colors"
+            >
+                Excluir
+            </button>
+        </div>
+    </div>
+</div>
+
 
 {% endblock %}
 {% block extra_body %}
@@ -30,6 +346,8 @@
             const nav = document.getElementById('main-nav');
             const bg = document.getElementById('nav-bg');
             const buttons = Array.from(nav.querySelectorAll('.nav-btn'));
+            const decksSidebar = document.getElementById('decks-sidebar');
+            const decksContent = document.getElementById('decks-content');
 
             // media query para md (>= 48rem / 768px)
             const mql = window.matchMedia('(min-width: 48rem)');
@@ -55,12 +373,31 @@
                 buttons.forEach(b => {
                     b.classList.remove('-translate-y-[29px]');
                     b.classList.remove('md:translate-x-11');
+                    b.removeAttribute('aria-current');
                 });
 
                 if (mql.matches) {
                     btn.classList.add('md:translate-x-11');
                 } else {
                     btn.classList.add('-translate-y-[29px]');
+                }
+                
+                btn.setAttribute('aria-current', 'page');
+
+                // Mostrar/esconder sidebar de decks e conteúdo no desktop
+                const page = btn.getAttribute('data-page');
+                if (page === 'decks') {
+                    decksContent.classList.remove('hidden');
+                    if (mql.matches) {
+                        decksSidebar.classList.remove('hidden');
+                        decksSidebar.classList.add('md:flex-col');
+                    }
+                } else {
+                    decksContent.classList.add('hidden');
+                    if (mql.matches) {
+                        decksSidebar.classList.add('hidden');
+                        decksSidebar.classList.remove('md:flex-col');
+                    }
                 }
             }
 
@@ -97,6 +434,394 @@
             // Inicializar: posicionar atrás do primeiro botão (ou do ativo se houver)
             window.addEventListener('load', function(){
                 repositionActive();
+            });
+
+            // Card flip functionality
+            const cardContainers = document.querySelectorAll('.card-flip-container');
+            cardContainers.forEach(container => {
+                container.addEventListener('click', function(e) {
+                    // Não virar o card se clicar nos botões
+                    if (e.target.closest('.btn-edit-card') || e.target.closest('.btn-delete-card')) {
+                        return;
+                    }
+                    
+                    const inner = this.querySelector('.card-flip-inner');
+                    const currentRotation = inner.style.transform;
+                    if (currentRotation.includes('rotateY(180deg)')) {
+                        inner.style.transform = 'rotateY(0deg)';
+                    } else {
+                        inner.style.transform = 'rotateY(180deg)';
+                    }
+                });
+            });
+
+            // Modal functionality
+            const modal = document.getElementById('modal-add-deck');
+            const btnAddDeck = document.getElementById('btn-add-deck');
+            const btnCancelDeck = document.getElementById('btn-cancel-deck');
+            const formAddDeck = document.getElementById('form-add-deck');
+            const deckNameInput = document.getElementById('deck-name-input');
+
+            // Abrir modal
+            btnAddDeck.addEventListener('click', function() {
+                modal.classList.remove('hidden');
+                deckNameInput.focus();
+            });
+
+            // Fechar modal
+            btnCancelDeck.addEventListener('click', function() {
+                modal.classList.add('hidden');
+                formAddDeck.reset();
+            });
+
+            // Fechar modal ao clicar fora
+            modal.addEventListener('click', function(e) {
+                if (e.target === modal) {
+                    modal.classList.add('hidden');
+                    formAddDeck.reset();
+                }
+            });
+
+            // Fechar modal com ESC
+            document.addEventListener('keydown', function(e) {
+                if (e.key === 'Escape' && !modal.classList.contains('hidden')) {
+                    modal.classList.add('hidden');
+                    formAddDeck.reset();
+                }
+            });
+
+            // Submit do formulário
+            formAddDeck.addEventListener('submit', function(e) {
+                e.preventDefault();
+                const deckName = deckNameInput.value.trim();
+                
+                if (deckName) {
+                    // Fazer requisição AJAX para criar o deck
+                    fetch('/decks/create/', {
+                        method: 'POST',
+                        headers: {
+                            'Content-Type': 'application/json',
+                            'X-CSRFToken': getCookie('csrftoken')
+                        },
+                        body: JSON.stringify({ name: deckName })
+                    })
+                    .then(response => response.json())
+                    .then(data => {
+                        if (data.id) {
+                            // Adicionar o novo deck à lista
+                            const decksList = document.getElementById('decks-list');
+                            const emptyMessage = decksList.querySelector('p');
+                            if (emptyMessage) {
+                                emptyMessage.remove();
+                            }
+                            
+                            const newDeck = document.createElement('div');
+                            newDeck.className = 'bg-gradient-to-b from-[#FE9A09] to-[#FF8000] rounded-2xl p-4 cursor-pointer hover:shadow-lg transition-shadow';
+                            newDeck.setAttribute('data-deck-id', data.id);
+                            newDeck.innerHTML = `<h3 style="font-family: 'Space Grotesk';" class="text-[#003554] text-sm font-bold">${data.name}</h3>`;
+                            
+                            decksList.insertBefore(newDeck, decksList.firstChild);
+                            
+                            // Fechar modal
+                            modal.classList.add('hidden');
+                            formAddDeck.reset();
+                        } else if (data.error) {
+                            alert('Erro: ' + data.error);
+                        }
+                    })
+                    .catch(error => {
+                        console.error('Erro ao criar deck:', error);
+                        alert('Erro ao criar deck. Tente novamente.');
+                    });
+                }
+            });
+
+            // Função para obter CSRF token
+            function getCookie(name) {
+                let cookieValue = null;
+                if (document.cookie && document.cookie !== '') {
+                    const cookies = document.cookie.split(';');
+                    for (let i = 0; i < cookies.length; i++) {
+                        const cookie = cookies[i].trim();
+                        if (cookie.substring(0, name.length + 1) === (name + '=')) {
+                            cookieValue = decodeURIComponent(cookie.substring(name.length + 1));
+                            break;
+                        }
+                    }
+                }
+                return cookieValue;
+            }
+
+            // Modal Editar Carta
+            const modalEditCard = document.getElementById('modal-edit-card');
+            const formEditCard = document.getElementById('form-edit-card');
+            const btnCancelEditCard = document.getElementById('btn-cancel-edit-card');
+            const editCardId = document.getElementById('edit-card-id');
+            const editCardQuestion = document.getElementById('edit-card-question');
+            const editCardAnswer = document.getElementById('edit-card-answer');
+
+            // Abrir modal de editar
+            document.addEventListener('click', function(e) {
+                if (e.target.closest('.btn-edit-card')) {
+                    const cardContainer = e.target.closest('.card-flip-container');
+                    const cardId = cardContainer.getAttribute('data-card-id');
+                    const question = cardContainer.querySelector('.card-question').textContent;
+                    const answer = cardContainer.querySelector('.card-answer').textContent;
+                    
+                    editCardId.value = cardId;
+                    editCardQuestion.value = question;
+                    editCardAnswer.value = answer;
+                    
+                    modalEditCard.classList.remove('hidden');
+                    editCardQuestion.focus();
+                }
+            });
+
+            // Fechar modal de editar
+            btnCancelEditCard.addEventListener('click', function() {
+                modalEditCard.classList.add('hidden');
+                formEditCard.reset();
+            });
+
+            modalEditCard.addEventListener('click', function(e) {
+                if (e.target === modalEditCard) {
+                    modalEditCard.classList.add('hidden');
+                    formEditCard.reset();
+                }
+            });
+
+            // Submit editar carta
+            formEditCard.addEventListener('submit', function(e) {
+                e.preventDefault();
+                const cardId = editCardId.value;
+                const question = editCardQuestion.value.trim();
+                const answer = editCardAnswer.value.trim();
+                
+                if (question && answer) {
+                    const formData = new FormData();
+                    formData.append('question', question);
+                    formData.append('answer', answer);
+                    
+                    // Adicionar arquivos se selecionados
+                    const imageFront = document.getElementById('edit-card-image-front').files[0];
+                    const audioFront = document.getElementById('edit-card-audio-front').files[0];
+                    const imageBack = document.getElementById('edit-card-image-back').files[0];
+                    const audioBack = document.getElementById('edit-card-audio-back').files[0];
+                    
+                    if (imageFront) formData.append('image_front', imageFront);
+                    if (audioFront) formData.append('audio_front', audioFront);
+                    if (imageBack) formData.append('image_back', imageBack);
+                    if (audioBack) formData.append('audio_back', audioBack);
+                    
+                    // TODO: Fazer requisição para API de atualizar carta
+                    fetch(`/cards/${cardId}/update/`, {
+                        method: 'PUT',
+                        headers: {
+                            'X-CSRFToken': getCookie('csrftoken')
+                        },
+                        body: formData
+                    })
+                    .then(response => response.json())
+                    .then(data => {
+                        if (data.success) {
+                            // Atualizar card na interface
+                            const cardContainer = document.querySelector(`[data-card-id="${cardId}"]`);
+                            cardContainer.querySelector('.card-question').textContent = question;
+                            cardContainer.querySelector('.card-answer').textContent = answer;
+                            
+                            modalEditCard.classList.add('hidden');
+                            formEditCard.reset();
+                        } else {
+                            alert('Erro ao atualizar carta');
+                        }
+                    })
+                    .catch(error => {
+                        console.error('Erro:', error);
+                        alert('Erro ao atualizar carta');
+                    });
+                }
+            });
+
+            // Modal Deletar Carta
+            const modalDeleteCard = document.getElementById('modal-delete-card');
+            const deleteCardId = document.getElementById('delete-card-id');
+            const btnCancelDeleteCard = document.getElementById('btn-cancel-delete-card');
+            const btnConfirmDeleteCard = document.getElementById('btn-confirm-delete-card');
+
+            // Abrir modal de deletar
+            document.addEventListener('click', function(e) {
+                if (e.target.closest('.btn-delete-card')) {
+                    const cardContainer = e.target.closest('.card-flip-container');
+                    const cardId = cardContainer.getAttribute('data-card-id');
+                    
+                    deleteCardId.value = cardId;
+                    modalDeleteCard.classList.remove('hidden');
+                }
+            });
+
+            // Fechar modal de deletar
+            btnCancelDeleteCard.addEventListener('click', function() {
+                modalDeleteCard.classList.add('hidden');
+            });
+
+            modalDeleteCard.addEventListener('click', function(e) {
+                if (e.target === modalDeleteCard) {
+                    modalDeleteCard.classList.add('hidden');
+                }
+            });
+
+            // Confirmar deletar carta
+            btnConfirmDeleteCard.addEventListener('click', function() {
+                const cardId = deleteCardId.value;
+                
+                // TODO: Fazer requisição para API de deletar carta
+                fetch(`/cards/${cardId}/delete/`, {
+                    method: 'DELETE',
+                    headers: {
+                        'X-CSRFToken': getCookie('csrftoken')
+                    }
+                })
+                .then(response => response.json())
+                .then(data => {
+                    if (data.success) {
+                        // Remover card da interface
+                        const cardContainer = document.querySelector(`[data-card-id="${cardId}"]`);
+                        cardContainer.remove();
+                        
+                        modalDeleteCard.classList.add('hidden');
+                    } else {
+                        alert('Erro ao excluir carta');
+                    }
+                })
+                .catch(error => {
+                    console.error('Erro:', error);
+                    alert('Erro ao excluir carta');
+                });
+            });
+
+            // Modal Adicionar Carta
+            const modalAddCard = document.getElementById('modal-add-card');
+            const btnAddCard = document.getElementById('btn-add-card');
+            const formAddCard = document.getElementById('form-add-card');
+            const btnCancelAddCard = document.getElementById('btn-cancel-add-card');
+
+            // Abrir modal de adicionar
+            btnAddCard.addEventListener('click', function() {
+                modalAddCard.classList.remove('hidden');
+                document.getElementById('add-card-question').focus();
+            });
+
+            // Fechar modal de adicionar
+            btnCancelAddCard.addEventListener('click', function() {
+                modalAddCard.classList.add('hidden');
+                formAddCard.reset();
+            });
+
+            modalAddCard.addEventListener('click', function(e) {
+                if (e.target === modalAddCard) {
+                    modalAddCard.classList.add('hidden');
+                    formAddCard.reset();
+                }
+            });
+
+            // Submit adicionar carta
+            formAddCard.addEventListener('submit', function(e) {
+                e.preventDefault();
+                const question = document.getElementById('add-card-question').value.trim();
+                const answer = document.getElementById('add-card-answer').value.trim();
+                
+                if (question && answer) {
+                    const formData = new FormData();
+                    formData.append('question', question);
+                    formData.append('answer', answer);
+                    
+                    // Adicionar arquivos se selecionados
+                    const imageFront = document.getElementById('add-card-image-front').files[0];
+                    const audioFront = document.getElementById('add-card-audio-front').files[0];
+                    const imageBack = document.getElementById('add-card-image-back').files[0];
+                    const audioBack = document.getElementById('add-card-audio-back').files[0];
+                    
+                    if (imageFront) formData.append('image_front', imageFront);
+                    if (audioFront) formData.append('audio_front', audioFront);
+                    if (imageBack) formData.append('image_back', imageBack);
+                    if (audioBack) formData.append('audio_back', audioBack);
+                    
+                    // TODO: Fazer requisição para API de criar carta
+                    fetch('/cards/create/', {
+                        method: 'POST',
+                        headers: {
+                            'X-CSRFToken': getCookie('csrftoken')
+                        },
+                        body: formData
+                    })
+                    .then(response => response.json())
+                    .then(data => {
+                        if (data.success) {
+                            // Adicionar novo card à interface
+                            const cardsGrid = document.getElementById('cards-grid');
+                            const addCardBtn = document.getElementById('btn-add-card');
+                            
+                            const newCard = document.createElement('div');
+                            newCard.className = 'card-flip-container min-h-64 cursor-pointer';
+                            newCard.setAttribute('data-card-id', data.card_id);
+                            newCard.style.perspective = '1000px';
+                            newCard.innerHTML = `
+                                <div class="card-flip-inner relative w-full h-full transition-transform duration-500" style="transform-style: preserve-3d;">
+                                    <div class="card-front absolute w-full h-full bg-gradient-to-b from-[#FE9A09] to-[#FF8000] rounded-3xl p-6 shadow-lg flex flex-col justify-between" style="backface-visibility: hidden;">
+                                        <div class="flex-1 flex items-center justify-center">
+                                            <p style="font-family: 'Space Grotesk';" class="card-question text-[#003554] text-lg font-bold text-center">${question}</p>
+                                        </div>
+                                        <div class="flex justify-between items-center">
+                                            <span style="font-family: 'Space Grotesk';" class="text-[#003554] text-xs font-semibold">Próxima revisão: Hoje</span>
+                                            <div class="flex gap-2">
+                                                <button class="btn-edit-card p-2 hover:bg-[#FF8000] rounded-full transition-colors z-10">
+                                                    <svg class="w-4 h-4 text-[#003554] pointer-events-none" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15.232 5.232l3.536 3.536m-2.036-5.036a2.5 2.5 0 113.536 3.536L6.5 21.036H3v-3.572L16.732 3.732z"></path>
+                                                    </svg>
+                                                </button>
+                                                <button class="btn-delete-card p-2 hover:bg-[#FF8000] rounded-full transition-colors z-10">
+                                                    <svg class="w-4 h-4 text-[#003554] pointer-events-none" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16"></path>
+                                                    </svg>
+                                                </button>
+                                            </div>
+                                        </div>
+                                    </div>
+                                    <div class="card-back absolute w-full h-full bg-gradient-to-b from-[#003554] to-[#002a42] rounded-3xl p-6 shadow-lg flex flex-col justify-center items-center" style="backface-visibility: hidden; transform: rotateY(180deg);">
+                                        <p style="font-family: 'Space Grotesk';" class="card-answer text-white text-xl font-bold text-center mb-4">${answer}</p>
+                                        <p style="font-family: 'Space Grotesk';" class="text-white text-sm text-center opacity-75">Clique novamente para voltar</p>
+                                    </div>
+                                </div>
+                            `;
+                            
+                            // Inserir antes do botão de adicionar
+                            cardsGrid.insertBefore(newCard, addCardBtn);
+                            
+                            // Adicionar evento de flip ao novo card
+                            newCard.addEventListener('click', function(e) {
+                                if (e.target.closest('.btn-edit-card') || e.target.closest('.btn-delete-card')) {
+                                    return;
+                                }
+                                const inner = this.querySelector('.card-flip-inner');
+                                const currentRotation = inner.style.transform;
+                                if (currentRotation.includes('rotateY(180deg)')) {
+                                    inner.style.transform = 'rotateY(0deg)';
+                                } else {
+                                    inner.style.transform = 'rotateY(180deg)';
+                                }
+                            });
+                            
+                            modalAddCard.classList.add('hidden');
+                            formAddCard.reset();
+                        } else {
+                            alert('Erro ao criar carta');
+                        }
+                    })
+                    .catch(error => {
+                        console.error('Erro:', error);
+                        alert('Erro ao criar carta');
+                    });
+                }
             });
         })();
     </script>
