@@ -18,6 +18,30 @@ def _safe_json(response):
     except ValueError:
         return {}
 
+
+def _format_next_review(next_review_raw, today=None):
+    """Format a nextReview date string (YYYY-MM-DD) into the desired display form.
+
+    Returns 'hoje' if date is today or in the past, 'amanhã' if it's tomorrow,
+    otherwise returns 'MM-DD'. If parsing fails or value is falsy, returns
+    the original value or empty string.
+    """
+    if not next_review_raw:
+        return ''
+    try:
+        next_date = datetime.strptime(next_review_raw, '%Y-%m-%d').date()
+    except Exception:
+        return next_review_raw
+
+    if today is None:
+        today = date.today()
+
+    if next_date <= today:
+        return 'hoje'
+    if next_date == today + timedelta(days=1):
+        return 'amanhã'
+    return next_date.strftime('%m-%d')
+
 def decks_view(request):
     if request.session.get('auth_token') == None:
         return redirect('login')
@@ -65,19 +89,13 @@ def decks_view(request):
         cards = []
 
         for i in dados_api:
-            data_revisao = datetime.strptime(i.get("nextReview"), '%Y-%m-%d').date()
-            if data_revisao <= hoje:
-                data_revisao = "hoje"
-            elif data_revisao == hoje + timedelta(days=1):
-                data_revisao = "amanhã"
-            else:
-                data_revisao = data_revisao.strftime('%d/%m')
-            
+            formatted_next = _format_next_review(i.get("nextReview"), hoje)
+
             card = {
                 "id": i.get("id"),
                 "frontText": i.get("frontText"),
                 "backText": i.get("backText"),
-                "nextReview": data_revisao,
+                "nextReview": formatted_next,
                 "imageUrl": i.get("imageUrl"),
                 "audioUrl": i.get("audioUrl"),
             }
@@ -179,6 +197,9 @@ def criar_card(request, deck_id):
 
     # If AJAX request, return created card JSON so client can insert it in DOM
     if request.headers.get('x-requested-with') == 'XMLHttpRequest':
+        # format nextReview for client display (keep other fields untouched)
+        if isinstance(created, dict) and 'nextReview' in created:
+            created['nextReview'] = _format_next_review(created.get('nextReview'))
         # resp.status_code may be 201 or 200; return that status where possible
         try:
             status = resp.status_code
@@ -223,6 +244,9 @@ def alterar_card(request, deck_id, card_id):
         return redirect('decks')
 
     if request.headers.get('x-requested-with') == 'XMLHttpRequest':
+        # ensure nextReview is formatted for client display
+        if isinstance(updated, dict) and 'nextReview' in updated:
+            updated['nextReview'] = _format_next_review(updated.get('nextReview'))
         try:
             status = resp.status_code
         except Exception:
@@ -275,6 +299,9 @@ def gerar_cards_from_file(request, deck_id):
         return redirect('login')
 
     if request.method != 'POST':
+        # For AJAX clients, return a JSON error; otherwise redirect.
+        if request.headers.get('x-requested-with') == 'XMLHttpRequest':
+            return JsonResponse({'error': 'method_not_allowed'}, status=405)
         return redirect('decks')
 
     uploaded_file = request.FILES.get('file')
@@ -300,9 +327,21 @@ def gerar_cards_from_file(request, deck_id):
         gen_result = _safe_json(resp)
     except requests.exceptions.RequestException as e:
         print(f"Erro ao enviar arquivo para gerar cards: {e}")
+        if request.headers.get('x-requested-with') == 'XMLHttpRequest':
+            return JsonResponse({'error': 'api_upload_failed', 'message': str(e)}, status=502)
         return redirect('decks')
 
     # Normalize cards list from response
+    # Some backends may return the JSON payload as a string (e.g. '"[... ]"').
+    # If we got a string, try to parse it into Python objects first.
+    if isinstance(gen_result, str):
+        try:
+            parsed = json.loads(gen_result)
+            gen_result = parsed
+        except Exception:
+            # leave gen_result as-is; fallback logic below will handle unexpected shapes
+            pass
+
     if isinstance(gen_result, dict) and 'cards' in gen_result:
         cards_list = gen_result.get('cards') or []
     elif isinstance(gen_result, list):
@@ -312,16 +351,27 @@ def gerar_cards_from_file(request, deck_id):
         cards_list = []
 
     if not cards_list:
+        if request.headers.get('x-requested-with') == 'XMLHttpRequest':
+            return JsonResponse({'error': 'no_cards_generated'}, status=204)
         return redirect('decks')
 
     # 2) Send the generated cards in bulk to create them
+    # The API bulk endpoint expects a JSON array (List) in the request body.
     bulk_url = f"{API_BASE}/decks/{deck_id}/cards/bulk"
     try:
-        # include Authorization header and let requests set Content-Type
-        resp2 = requests.post(bulk_url, headers=headers, json={'cards': cards_list}, timeout=60)
+        # send the raw list as the JSON body (not wrapped in an object)
+        resp2 = requests.post(bulk_url, headers=headers, json=cards_list, timeout=60)
         resp2.raise_for_status()
     except requests.exceptions.RequestException as e:
         print(f"Erro ao criar cards em bulk: {e}")
+        if request.headers.get('x-requested-with') == 'XMLHttpRequest':
+            return JsonResponse({'error': 'bulk_create_failed', 'message': str(e)}, status=502)
+        return redirect('decks')
+
+    # Success — if this was an AJAX request, return JSON with details so the
+    # client can update the UI without a full reload.
+    if request.headers.get('x-requested-with') == 'XMLHttpRequest':
+        return JsonResponse({'ok': True, 'created': len(cards_list)}, status=201)
 
     return redirect('decks')
 

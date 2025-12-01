@@ -1,187 +1,94 @@
 {% extends 'base.html' %}
 {% load static %}
 
-{% comment %} {% extends 'base.html' %}
-{% load static %}
-
-{% block title %}Revisão de Cartas{% endblock title %}
-
-{% block body %}
-<div class="min-h-screen flex items-center justify-center bg-gray-50 p-6">
-  <div class="w-full max-w-3xl">
-    {% if error %}
-      <div class="mb-4 p-4 bg-red-100 text-red-700 rounded">{{ error }}</div>
-    {% endif %}
-
-    {% if card %}
-    <div id="review-card" class="bg-white rounded-2xl shadow-lg p-8 relative">
-      <div class="mb-6">
-        <h2 class="text-xl font-bold text-[#003554]">Revisão</h2>
-        <p class="text-sm text-gray-500">Deck: {{ deck_id }}</p>
-      </div>
-
-      <div id="card-front" class="mb-6">
-        <div class="bg-linear-to-b from-[#FE9A09] to-[#FF8000] rounded-xl p-6 text-center">
-          <p class="text-[#003554] text-lg font-bold">{{ card.frontText }}</p>
-          {% if card.imageUrl %}
-            <div class="mt-4">
-              <img src="{{ card.imageUrl }}" alt="Imagem frente" class="mx-auto max-h-48 object-contain" />
-            </div>
-          {% endif %}
-          {% if card.audioUrl %}
-            <div class="mt-4">
-              <audio controls src="{{ card.audioUrl }}" class="mx-auto"></audio>
-            </div>
-          {% endif %}
-        </div>
-      </div>
-
-      <div id="card-back" class="mb-6">
-        <div class="bg-linear-to-b from-[#003554] to-[#002a42] rounded-xl p-6 text-center text-white">
-          <p class="text-xl font-bold">{{ card.backText }}</p>
-          {% if card.imageUrl %}
-            <div class="mt-4">
-              <img src="{{ card.imageUrl }}" alt="Imagem verso" class="mx-auto max-h-48 object-contain" />
-            </div>
-          {% endif %}
-          {% if card.audioUrl %}
-            <div class="mt-4">
-              <audio controls src="{{ card.audioUrl }}" class="mx-auto"></audio>
-            </div>
-          {% endif %}
-        </div>
-      </div>
-
-      <form method="post" class="flex gap-3 justify-center mt-4">
-        {% csrf_token %}
-        <input type="hidden" name="card_id" value="{{ card.id }}" />
-        <input type="hidden" name="deck_id" value="{{ deck_id }}" />
-
-        <button type="submit" name="evaluation" value="hard" class="px-6 py-3 rounded-full bg-red-500 text-white font-semibold">Difícil</button>
-        <button type="submit" name="evaluation" value="good" class="px-6 py-3 rounded-full bg-yellow-500 text-white font-semibold">Bom</button>
-        <button type="submit" name="evaluation" value="easy" class="px-6 py-3 rounded-full bg-green-600 text-white font-semibold">Fácil</button>
-      </form>
-
-      <div class="mt-4 text-center text-sm text-gray-500">
-        <a href="{% url 'decks' %}" class="underline">Voltar para decks</a>
-      </div>
-    </div>
-    {% else %}
-    <div class="bg-white rounded-2xl shadow-lg p-8 text-center">
-      <h2 class="text-xl font-bold text-[#003554] mb-3">Sem cartas para revisar</h2>
-      <p class="text-gray-600 mb-6">Parabéns — não há cartas pendentes para este baralho agora.</p>
-      <a href="{% url 'decks' %}" class="inline-block px-6 py-3 bg-[#003554] text-white rounded-full">Voltar para decks</a>
-    </div>
-    {% endif %}
-  </div>
-</div>
-{% endblock body %}
-
-{% block extra_body %}
-<script>
-  // Simple flip behavior: clicking front toggles back visibility (purely cosmetic)
-  (function(){
-    const front = document.getElementById('card-front');
-    const back = document.getElementById('card-back');
-    if (!front || !back) return;
-    back.style.display = 'none';
-    front.addEventListener('click', () => {
-      front.style.display = 'none'; back.style.display = '';
-    });
-    back.addEventListener('click', () => {
-      back.style.display = 'none'; front.style.display = '';
-    });
-  })();
-</script>
-{% endblock extra_body %} {% endcomment %}
-
-
-
-
 {% block title %}Revisar Cards - Reviu{% endblock %}
 
 {% block body %}
-<div class="min-h-screen bg-white flex flex-col items-center justify-center p-4 relative overflow-hidden">
-    <!-- Botão Voltar para o Deck no topo à direita -->
-    <div class="w-full max-w-2xl flex justify-end mb-2 z-30 relative">
-        <a href="{% url 'decks' %}" class="px-6 py-2 bg-[#003554] text-white rounded-full font-semibold shadow hover:bg-[#045685] transition-colors">
-            Voltar para o Deck
-        </a>
-    </div>
-    {% if card %}
+<div class="h-screen flex flex-col">
+  <div class="min-h-screen bg-white flex flex-col items-center justify-center p-4 relative overflow-hidden">
+      <!-- Botão Voltar para o Deck no topo à direita -->
+      <div class="w-full max-w-2xl flex justify-end mb-2 z-30 relative">
+          <a href="{% url 'decks' %}" class="px-6 py-2 bg-[#003554] text-white rounded-full font-semibold shadow hover:bg-[#045685] transition-colors">
+              Voltar para o Deck
+          </a>
+      </div>
+      {% if card %}
 
-    <!-- Card de Revisão com Flip -->
-    <div class="w-full max-w-2xl mb-8 h-96" style="perspective: 1000px;">
-        <div id="review-card" class="relative w-full h-full transition-transform duration-500 cursor-pointer" style="transform-style: preserve-3d;">
+      <!-- Card de Revisão com Flip -->
+      <div class="w-full max-w-2xl mb-8 h-96" style="perspective: 1000px;">
+          <div id="review-card" class="relative w-full h-full transition-transform duration-500 cursor-pointer" style="transform-style: preserve-3d;">
+              
+              <!-- Frente do Card (Pergunta) -->
+              <div class="card-front absolute w-full h-full bg-linear-to-b from-[#FE9A09] to-[#FF8000] rounded-3xl shadow-xl p-8 flex flex-col justify-center items-center" style="backface-visibility: hidden;">
+                  <p class="text-2xl text-[#003554] font-bold text-center" id="card-question">
+                      {{ card.frontText }}
+                  </p>
+                  <p class="text-center text-[#003554] mt-6 opacity-75 text-sm">
+                      Clique para ver a resposta
+                  </p>
+              </div>
+              
+              <!-- Verso do Card (Resposta) -->
+              <div class="card-back absolute w-full h-full bg-linear-to-b from-[#003554] to-[#002a42] rounded-3xl shadow-xl p-8 flex flex-col justify-center items-center" style="backface-visibility: hidden; transform: rotateY(180deg);">
+                  <p class="text-3xl text-white font-bold text-center mb-4" id="card-answer">
+                      {{ card.backText }}
+                  </p>
+                  <p class="text-center text-white opacity-75 text-sm">
+                      Avalie sua resposta abaixo
+                  </p>
+              </div>
+              
+          </div>
+      </div>
+      {% else %}
+      <div class="bg-white rounded-2xl shadow-lg p-8 text-center">
+        <h2 class="text-xl font-bold text-[#003554] mb-3">Sem cartas para revisar</h2>
+        <p class="text-gray-600 mb-6">Parabéns — não há cartas pendentes para este baralho agora.</p>
+        <a href="{% url 'decks' %}" class="inline-block px-6 py-3 bg-[#003554] text-white rounded-full">Voltar para decks</a>
+      </div>
+      {% endif %}
+      <!-- Botões de Avaliação Embaixo -->
+      <div id="rating-buttons" class="hidden">
+        <form method="post" class="w-full max-w-2xl grid grid-cols-5 gap-4 mb-8 z-40">
+            {% csrf_token %}
+            <input type="hidden" name="card_id" value="{{ card.id }}" />
+            <input type="hidden" name="deck_id" value="{{ deck_id }}" />
+            <button 
+                onclick="rateCard('errei')"
             
-            <!-- Frente do Card (Pergunta) -->
-            <div class="card-front absolute w-full h-full bg-linear-to-b from-[#FE9A09] to-[#FF8000] rounded-3xl shadow-xl p-8 flex flex-col justify-center items-center" style="backface-visibility: hidden;">
-                <p class="text-2xl text-[#003554] font-bold text-center" id="card-question">
-                    {{ card.frontText }}
-                </p>
-                <p class="text-center text-[#003554] mt-6 opacity-75 text-sm">
-                    Clique para ver a resposta
-                </p>
-            </div>
+                class="px-6 py-4 bg-red-600 text-white font-bold rounded-xl hover:bg-red-700 transition-colors">
+                <div class="text-xs mb-1">Errei</div>
+            </button>
+            <button 
+                onclick="rateCard('dificil')"
             
-            <!-- Verso do Card (Resposta) -->
-            <div class="card-back absolute w-full h-full bg-linear-to-b from-[#003554] to-[#002a42] rounded-3xl shadow-xl p-8 flex flex-col justify-center items-center" style="backface-visibility: hidden; transform: rotateY(180deg);">
-                <p class="text-3xl text-white font-bold text-center mb-4" id="card-answer">
-                    {{ card.backText }}
-                </p>
-                <p class="text-center text-white opacity-75 text-sm">
-                    Avalie sua resposta abaixo
-                </p>
-            </div>
+                class="px-6 py-4 bg-orange-500 text-white font-bold rounded-xl hover:bg-orange-600 transition-colors">
+                <div class="text-xs mb-1">Difícil</div>
+            </button>
+            <button 
+                onclick="rateCard('normal')"
             
-        </div>
-    </div>
-    {% else %}
-    <div class="bg-white rounded-2xl shadow-lg p-8 text-center">
-      <h2 class="text-xl font-bold text-[#003554] mb-3">Sem cartas para revisar</h2>
-      <p class="text-gray-600 mb-6">Parabéns — não há cartas pendentes para este baralho agora.</p>
-      <a href="{% url 'decks' %}" class="inline-block px-6 py-3 bg-[#003554] text-white rounded-full">Voltar para decks</a>
-    </div>
-    {% endif %}
-    <!-- Botões de Avaliação Embaixo -->
-     <form id="rating-buttons" method="post" class="w-full max-w-2xl grid grid-cols-5 gap-4 mb-8 hidden z-40">
-        {% csrf_token %}
-        <input type="hidden" name="card_id" value="{{ card.id }}" />
-        <input type="hidden" name="deck_id" value="{{ deck_id }}" />
-        <button 
-            onclick="rateCard('errei')"
-        
-            class="px-6 py-4 bg-red-600 text-white font-bold rounded-xl hover:bg-red-700 transition-colors">
-            <div class="text-xs mb-1">Errei</div>
-        </button>
-        <button 
-            onclick="rateCard('dificil')"
-        
-            class="px-6 py-4 bg-orange-500 text-white font-bold rounded-xl hover:bg-orange-600 transition-colors">
-            <div class="text-xs mb-1">Difícil</div>
-        </button>
-        <button 
-            onclick="rateCard('normal')"
-        
-            class="px-6 py-4 bg-yellow-400 text-[#003554] font-bold rounded-xl hover:bg-yellow-500 transition-colors">
-            <div class="text-xs mb-1">Normal</div>
-        </button>
-        <button 
-            onclick="rateCard('facil')"
-        
-            class="px-6 py-4 bg-green-600 text-white font-bold rounded-xl hover:bg-green-700 transition-colors">
-            <div class="text-xs mb-1">Fácil</div>
-        </button>
-        <button 
-            onclick="rateCard('muito_facil')"
-        
-            class="px-6 py-4 bg-blue-600 text-white font-bold rounded-xl hover:bg-blue-700 transition-colors">
-            <div class="text-xs mb-1">Muito fácil</div>
-        </button>
-    </form>
-    
-    <!-- Botão Voltar para o Deck removido do rodapé -->
-    
+                class="px-6 py-4 bg-yellow-400 text-[#003554] font-bold rounded-xl hover:bg-yellow-500 transition-colors">
+                <div class="text-xs mb-1">Normal</div>
+            </button>
+            <button 
+                onclick="rateCard('facil')"
+            
+                class="px-6 py-4 bg-green-600 text-white font-bold rounded-xl hover:bg-green-700 transition-colors">
+                <div class="text-xs mb-1">Fácil</div>
+            </button>
+            <button 
+                onclick="rateCard('muito_facil')"
+            
+                class="px-6 py-4 bg-blue-600 text-white font-bold rounded-xl hover:bg-blue-700 transition-colors">
+                <div class="text-xs mb-1">Muito fácil</div>
+            </button>
+        </form>
+      </div>
+      
+      <!-- Botão Voltar para o Deck removido do rodapé -->
+      
+  </div>
 </div>
 {% endblock %}
 

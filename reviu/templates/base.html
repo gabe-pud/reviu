@@ -11,16 +11,20 @@
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
     <link href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@400;500;600;700&family=Poppins:wght@400;600;700&family=Inter:wght@400;500;600&display=swap" rel="stylesheet">
     <link rel="stylesheet" href="{% static 'src/output.css' %}">
+    <style>
+        /* Evita animação inicial do background do nav até ser posicionado */
+        #nav-bg.no-transition { transition: none !important; }
+    </style>
 
 </head>
 <body>
     <div class="h-screen flex">
         {% if page == "auth" %}
         {% else %}
-            <nav id="main-nav" class="absolute flex justify-between px-16 pb-4 w-full bottom-0 bg-[#003554]
+            <nav id="main-nav" class="absolute flex justify-between px-16 pb-4 w-full bottom-0 bg-[#003554] z-10
             md:static md:left-0 md:bottom-auto md:flex-col md:pr-4 md:pl-2 md:py-16 md:w-fit md:justify-start md:gap-5">
-                <img id="nav-bg" class="absolute left-9 -top-[33.5px] w-28 pointer-events-none transition-all duration-300 ease-in-out z-10
-                md:rotate-90 md:left-4.75 {% if request.path == '/' %} md:top-13.5 {% elif request.path == '/decks/' %} md:top-32.5 {% endif %}" src="{% static 'resouces/nav-button-bg.svg' %}" alt="">
+                <img id="nav-bg" class="absolute -top-[33.5px] w-28 pointer-events-none transition-all duration-300 ease-in-out no-transition z-10
+                md:rotate-90 md:left-4.75" src="{% static 'resouces/nav-button-bg.svg' %}" alt="">
 
                 <a href="{% url 'home' %}" class="nav-btn size-14 p-3 rounded-full transition-transform duration-300 ease-in-out z-30 {% if request.path == '/' %} -translate-y-[29px] md:translate-y-0 md:translate-x-11 {% endif %}" role="button" aria-current="page">
                     <img src="{% static 'resouces/home.svg' %}" alt="Home">
@@ -28,9 +32,8 @@
                 <a href="{% url 'decks' %}" class="nav-btn size-14 p-3 rounded-full transition-transform duration-300 ease-in-out z-30 {% if request.path == '/decks/' %} -translate-y-[29px] md:translate-y-0 md:translate-x-11 {% endif %}" role="button">
                     <img src="{% static 'resouces/cards.svg' %}" alt="Cards">
                 </a>
-                {% comment %} utilizando botão de perfil como logout por enquanto, alterar assim que pagina de perfil estiver disponível {% endcomment %}
-                <a href="{% url 'logout' %}" class="nav-btn size-14 p-3 rounded-full transition-transform duration-300 ease-in-out z-30 {% if request.path == '' %} -translate-y-[29px] md:translate-y-0 md:translate-x-11 {% endif %}" role="button">
-                    <img src="{% static 'resouces/user.svg' %}" alt="User">
+                <a href="#" id="btn-logout" data-logout-url="{% url 'logout' %}" class="nav-btn size-14 p-3 rounded-full transition-transform duration-300 ease-in-out z-30 {% if request.path == '' %} -translate-y-[29px] md:translate-y-0 md:translate-x-11 {% endif %}" role="button">
+                    <img src="{% static 'resouces/logout.svg' %}" alt="User">
                 </a>
             </nav>
         {% endif %}
@@ -43,6 +46,23 @@
     {% block extra_body %}
     {% endblock extra_body %}
 
+    <!-- Modal Confirmar Logout -->
+    <div id="modal-logout" class="hidden">
+        <div class="fixed inset-0 bg-[#00000046] z-50 flex items-center justify-center p-4">
+            <div class="bg-white rounded-3xl p-8 max-w-md w-full shadow-2xl">
+                <h2 class="text-[#003554] text-2xl font-bold mb-4">Logout</h2>
+                <p class="text-gray-700 mb-6">Tem certeza que deseja sair da sua conta?</p>
+                <div class="flex gap-3">
+                    <button type="button" id="btn-cancel-logout" class="flex-1 px-6 py-3 rounded-full border-2 border-gray-300 text-gray-700 font-semibold hover:bg-gray-100 transition-colors">Cancelar</button>
+                    <form method="post" action="{% url 'logout' %}" class="flex-1">
+                        {% csrf_token %}
+                        <button type="submit" id="btn-confirm-logout" class="w-full px-6 py-3 rounded-full bg-[#003554] hover:bg-[#004565] text-white font-semibold transition-colors">Sair</button>
+                    </form>
+                </div>
+            </div>
+        </div>
+    </div>
+
     {% if page == "auth" %}
     {% else %}
         <script>
@@ -50,6 +70,8 @@
                 const nav = document.getElementById('main-nav');
                 if (!nav) return;
                 const bg = document.getElementById('nav-bg');
+                // Garantir que a transição esteja desativada até o posicionamento inicial
+                if (bg && !bg.classList.contains('no-transition')) bg.classList.add('no-transition');
                 const buttons = Array.from(nav.querySelectorAll('.nav-btn'));
                 const currentPath = "{{ request.path }}";
 
@@ -168,9 +190,72 @@
                     mql.addListener(repositionActive);
                 }
 
+                // Reposiciona imediatamente (sem animação) para evitar movimento visível
+                repositionActive();
+                // Reativar transições no próximo frame para permitir animações posteriores
+                requestAnimationFrame(function(){ if (bg) bg.classList.remove('no-transition'); });
+
+                // Também reposicionar após o load como fallback
                 window.addEventListener('load', function(){
                     repositionActive();
                 });
+
+                // Logout modal handling
+                const modalLogout = document.getElementById('modal-logout');
+                const btnLogout = document.getElementById('btn-logout');
+                const btnCancelLogout = document.getElementById('btn-cancel-logout');
+                let _prevActiveNavHref = null;
+
+                // Capture the previously active nav item before any click handlers change it
+                if (btnLogout) {
+                    // pointerdown happens before click and before other click handlers, so store prior state
+                    btnLogout.addEventListener('pointerdown', function() {
+                        try { _prevActiveNavHref = localStorage.getItem('reviu.navActive'); } catch (e) { _prevActiveNavHref = null; }
+                    });
+
+                    btnLogout.addEventListener('click', function(e){
+                        if (e && typeof e.preventDefault === 'function') e.preventDefault();
+                        if (modalLogout) modalLogout.classList.remove('hidden');
+                    });
+                }
+
+                function _restorePrevNav() {
+                    try {
+                        const targetHref = _prevActiveNavHref;
+                        let restoreBtn = null;
+                        if (targetHref) {
+                            restoreBtn = buttons.find(b => b.tagName === 'A' && b.getAttribute('href') === targetHref);
+                        }
+                        if (!restoreBtn) restoreBtn = buttons[0];
+                        if (restoreBtn) moveBgTo(restoreBtn);
+                        try { if (targetHref) localStorage.setItem('reviu.navActive', targetHref); } catch (e) {}
+                    } finally {
+                        _prevActiveNavHref = null;
+                    }
+                }
+
+                if (btnCancelLogout && modalLogout) {
+                    btnCancelLogout.addEventListener('click', function(){
+                        if (modalLogout) modalLogout.classList.add('hidden');
+                        _restorePrevNav();
+                    });
+                }
+
+                if (modalLogout) {
+                    modalLogout.addEventListener('click', function(e){
+                        if (e.target === modalLogout) {
+                            modalLogout.classList.add('hidden');
+                            _restorePrevNav();
+                        }
+                    });
+
+                    document.addEventListener('keydown', function(e) {
+                        if (e.key === 'Escape' && !modalLogout.classList.contains('hidden')) {
+                            modalLogout.classList.add('hidden');
+                            _restorePrevNav();
+                        }
+                    });
+                }
             })();
         </script>
     {% endif %}
