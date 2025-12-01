@@ -514,43 +514,81 @@
                 }
             });
 
-            // Submit editar carta
-            formEditCard.addEventListener('submit', function(e) {
+            // Submit editar carta via AJAX (sem recarregar a página)
+            formEditCard.addEventListener('submit', async function(e) {
                 e.preventDefault();
                 const cardId = editCardId.value;
                 const question = editCardQuestion.value.trim();
                 const answer = editCardAnswer.value.trim();
-                
-                if (question && answer) {
-                    const formData = new FormData();
-                    formData.append('question', question);
-                    formData.append('answer', answer);
-                    
-                    // Adicionar arquivos se selecionados (checando existência dos inputs)
-                    const imageFrontEl = document.getElementById('edit-card-image-front');
-                    const audioFrontEl = document.getElementById('edit-card-audio-front');
-                    const imageBackEl = document.getElementById('edit-card-image-back');
-                    const audioBackEl = document.getElementById('edit-card-audio-back');
 
-                    const imageFront = imageFrontEl && imageFrontEl.files && imageFrontEl.files.length ? imageFrontEl.files[0] : null;
-                    const audioFront = audioFrontEl && audioFrontEl.files && audioFrontEl.files.length ? audioFrontEl.files[0] : null;
-                    const imageBack = imageBackEl && imageBackEl.files && imageBackEl.files.length ? imageBackEl.files[0] : null;
-                    const audioBack = audioBackEl && audioBackEl.files && audioBackEl.files.length ? audioBackEl.files[0] : null;
+                if (!question || !answer) return;
 
-                    if (imageFront) formData.append('image_front', imageFront);
-                    if (audioFront) formData.append('audio_front', audioFront);
-                    if (imageBack) formData.append('image_back', imageBack);
-                    if (audioBack) formData.append('audio_back', audioBack);
-                    
-                    // Submit the edit form to the server-side view to handle update
-                    // set the form action to include the card id so the view can route
-                    // use the explicit edit endpoint
-                    formEditCard.action = `/decks/${currentDeckId}/cards/${cardId}/edit/`;
-                    // ensure the form fields reflect current values
-                    formEditCard.querySelector('#edit-card-question').value = question;
-                    formEditCard.querySelector('#edit-card-answer').value = answer;
-                    // the file inputs are already inside the form, so a normal submit will include them
-                    formEditCard.submit();
+                const fd = new FormData();
+                fd.append('frontText', question);
+                fd.append('backText', answer);
+
+                // Append files if present (use names the backend expects)
+                const imageFrontEl = document.getElementById('edit-card-image-front');
+                const audioFrontEl = document.getElementById('edit-card-audio-front');
+                if (imageFrontEl && imageFrontEl.files && imageFrontEl.files.length) fd.append('imageUrl', imageFrontEl.files[0]);
+                if (audioFrontEl && audioFrontEl.files && audioFrontEl.files.length) fd.append('audioUrl', audioFrontEl.files[0]);
+
+                const url = `/decks/${currentDeckId}/cards/${cardId}/edit/`;
+                const csrftoken = getCookie('csrftoken');
+
+                const submitBtn = formEditCard.querySelector('button[type="submit"]');
+                let originalBtnText = null;
+                if (submitBtn) {
+                    originalBtnText = submitBtn.innerHTML;
+                    submitBtn.disabled = true;
+                    submitBtn.innerHTML = 'Salvando...';
+                }
+
+                try {
+                    const resp = await fetch(url, {
+                        method: 'POST',
+                        headers: {
+                            'X-CSRFToken': csrftoken,
+                            'X-Requested-With': 'XMLHttpRequest',
+                            'Accept': 'application/json'
+                        },
+                        body: fd
+                    });
+
+                    if (!resp.ok) {
+                        const text = await resp.text();
+                        throw new Error(text || 'Erro ao editar carta');
+                    }
+
+                    // Parse response safely (handle 204 / empty bodies)
+                    let data = {};
+                    if (resp.status !== 204) {
+                        const text = await resp.text();
+                        if (text) {
+                            try { data = JSON.parse(text); } catch (err) { data = {}; }
+                        }
+                    }
+
+                    // Update card DOM (question and answer)
+                    const cardEl = document.querySelector(`.card-flip-container[data-card-id="${cardId}"]`);
+                    if (cardEl) {
+                        const qEl = cardEl.querySelector('.card-question');
+                        const aEl = cardEl.querySelector('.card-answer');
+                        if (qEl) qEl.textContent = data.frontText || question;
+                        if (aEl) aEl.textContent = data.backText || answer;
+                    }
+
+                    // Close modal and reset form
+                    modalEditCard.classList.add('hidden');
+                    formEditCard.reset();
+
+                } catch (err) {
+                    alert('Erro ao editar carta: ' + (err.message || err));
+                } finally {
+                    if (submitBtn) {
+                        submitBtn.disabled = false;
+                        submitBtn.innerHTML = originalBtnText || 'Salvar';
+                    }
                 }
             });
 
@@ -582,23 +620,52 @@
                 }
             });
 
-            // Confirmar deletar carta
+            // Confirmar deletar carta (via AJAX, sem recarregar a página)
             btnConfirmDeleteCard.addEventListener('click', function() {
                 const cardId = deleteCardId.value;
-                
-                // Submit a small POST form to Django view to delete the card server-side
-                const tempForm = document.createElement('form');
-                // Use POST so Django receives the submission correctly
-                tempForm.method = 'post';
-                // Use explicit delete endpoint so it doesn't collide with edit URL
-                tempForm.action = `/decks/${currentDeckId}/cards/${cardId}/delete/`;
-                const csrfInput = document.createElement('input');
-                csrfInput.type = 'hidden';
-                csrfInput.name = 'csrfmiddlewaretoken';
-                csrfInput.value = getCookie('csrftoken');
-                tempForm.appendChild(csrfInput);
-                document.body.appendChild(tempForm);
-                tempForm.submit();
+                if (!cardId) return;
+
+                const url = `/decks/${currentDeckId}/cards/${cardId}/delete/`;
+                const csrftoken = getCookie('csrftoken');
+
+                fetch(url, {
+                    method: 'POST',
+                    headers: {
+                        'X-CSRFToken': csrftoken,
+                        'X-Requested-With': 'XMLHttpRequest',
+                        'Accept': 'application/json'
+                    }
+                }).then(response => {
+                    if (!response.ok) throw response;
+                    // If API returned 204 No Content (empty body), handle gracefully
+                    if (response.status === 204) return {};
+                    // Some servers return empty body with 200/204; read text and parse safely
+                    return response.text().then(text => {
+                        if (!text) return {};
+                        try { return JSON.parse(text); } catch (e) { return {}; }
+                    });
+                }).then(data => {
+                    // Remove o card do DOM
+                    const cardEl = document.querySelector(`.card-flip-container[data-card-id="${cardId}"]`);
+                    if (cardEl) cardEl.remove();
+                    // Fechar modal
+                    modalDeleteCard.classList.add('hidden');
+                }).catch(async (err) => {
+                    let msg = 'Erro ao excluir carta.';
+                    // If the thrown error is a Response (non-OK), try to read it's JSON message
+                    if (err && typeof err.json === 'function') {
+                        try {
+                            const j = await err.json();
+                            if (j && j.message) msg = j.message;
+                        } catch (e) {
+                            // ignore parsing error
+                        }
+                    } else if (err && err.message) {
+                        // network or syntax error
+                        msg = err.message;
+                    }
+                    alert(msg);
+                });
             });
 
             // Modal Adicionar Carta
@@ -626,40 +693,120 @@
                 }
             });
 
-            // Submit adicionar carta
-            formAddCard.addEventListener('submit', function(e) {
-                e.preventDefault();
-                const question = document.getElementById('add-card-question').value.trim();
-                const answer = document.getElementById('add-card-answer').value.trim();
-                
-                if (question && answer) {
-                    const formData = new FormData();
-                    formData.append('question', question);
-                    formData.append('answer', answer);
-                    
-                    // Adicionar arquivos se selecionados (checando existência dos inputs)
-                    const imageFrontEl = document.getElementById('add-card-image-front');
-                    const audioFrontEl = document.getElementById('add-card-audio-front');
-                    const imageBackEl = document.getElementById('add-card-image-back');
-                    const audioBackEl = document.getElementById('add-card-audio-back');
+                        // Submit adicionar carta via AJAX (sem recarregar a página)
+                        formAddCard.addEventListener('submit', async function(e) {
+                                e.preventDefault();
+                                const questionEl = document.getElementById('add-card-question');
+                                const answerEl = document.getElementById('add-card-answer');
+                                const question = questionEl.value.trim();
+                                const answer = answerEl.value.trim();
 
-                    const imageFront = imageFrontEl && imageFrontEl.files && imageFrontEl.files.length ? imageFrontEl.files[0] : null;
-                    const audioFront = audioFrontEl && audioFrontEl.files && audioFrontEl.files.length ? audioFrontEl.files[0] : null;
-                    const imageBack = imageBackEl && imageBackEl.files && imageBackEl.files.length ? imageBackEl.files[0] : null;
-                    const audioBack = audioBackEl && audioBackEl.files && audioBackEl.files.length ? audioBackEl.files[0] : null;
+                                if (!question || !answer) return;
 
-                    if (imageFront) formData.append('image_front', imageFront);
-                    if (audioFront) formData.append('audio_front', audioFront);
-                    if (imageBack) formData.append('image_back', imageBack);
-                    if (audioBack) formData.append('audio_back', audioBack);
-                    
-                    // Submit the add-card form to the Django view so server-side handles creation
-                    // the file inputs are part of the form, so a normal submit will include them
-                    formAddCard.querySelector('#add-card-question').value = question;
-                    formAddCard.querySelector('#add-card-answer').value = answer;
-                    formAddCard.submit();
-                }
-            });
+                                // Put trimmed values back into inputs (so FormData(form) will include them)
+                                questionEl.value = question;
+                                answerEl.value = answer;
+
+                                const fd = new FormData(formAddCard);
+                                const url = `/decks/${currentDeckId}/cards/`;
+                                const csrftoken = getCookie('csrftoken');
+
+                                const submitBtn = formAddCard.querySelector('button[type="submit"]');
+                                let originalBtnText = null;
+                                if (submitBtn) {
+                                        originalBtnText = submitBtn.innerHTML;
+                                        submitBtn.disabled = true;
+                                        submitBtn.innerHTML = 'Criando...';
+                                }
+
+                                try {
+                                        const resp = await fetch(url, {
+                                                method: 'POST',
+                                                headers: {
+                                                        'X-CSRFToken': csrftoken,
+                                                        'X-Requested-With': 'XMLHttpRequest',
+                                                        'Accept': 'application/json'
+                                                },
+                                                body: fd
+                                        });
+
+                                        if (!resp.ok) {
+                                                const text = await resp.text();
+                                                throw new Error(text || 'Erro ao criar carta');
+                                        }
+
+                                        // Try to parse JSON safely (server may return 201 with body or 204 empty)
+                                        let data = {};
+                                        if (resp.status !== 204) {
+                                                const text = await resp.text();
+                                                if (text) {
+                                                        try { data = JSON.parse(text); } catch (e) { data = {}; }
+                                                }
+                                        }
+
+                                        // Build card data (prefer API response, fall back to local inputs)
+                                        const cardData = (data && (data.id || data.frontText)) ? data : {
+                                                id: 'local-' + Date.now(),
+                                                frontText: question,
+                                                backText: answer,
+                                                nextReview: 'hoje'
+                                        };
+
+                                        // Create DOM element for the new card
+                                        const cardEl = document.createElement('div');
+                                        cardEl.className = 'card-flip-container h-98 aspect-2/3 cursor-pointer';
+                                        cardEl.setAttribute('data-card-id', cardData.id);
+                                        cardEl.style.perspective = '1000px';
+                                        cardEl.innerHTML = `
+                                                <div class="card-flip-inner relative w-full h-full transition-transform duration-500" style="transform-style: preserve-3d;">
+                                                    <div class="card-front absolute w-full h-full bg-linear-to-b from-[#FE9A09] to-[#FF8000] rounded-3xl p-6 shadow-lg flex flex-col justify-between" style="backface-visibility: hidden;">
+                                                        <div class="flex-1 flex flex-col items-center justify-center gap-4">
+                                                            <p class="card-question text-[#003554] text-lg font-bold text-center">${escapeHtml(cardData.frontText || '')}</p>
+                                                        </div>
+                                                        <div class="flex justify-between items-center">
+                                                            <span class="text-[#003554] text-xs font-semibold">Próxima revisão: ${escapeHtml(cardData.nextReview || '')}</span>
+                                                            <div class="flex gap-2">
+                                                                <button class="btn-edit-card p-2 hover:bg-[#FF8000] rounded-full transition-colors z-10">
+                                                                    <svg class="w-4 h-4 text-[#003554] pointer-events-none" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15.232 5.232l3.536 3.536m-2.036-5.036a2.5 2.5 0 113.536 3.536L6.5 21.036H3v-3.572L16.732 3.732z"></path></svg>
+                                                                </button>
+                                                                <button class="btn-delete-card p-2 hover:bg-[#FF8000] rounded-full transition-colors z-10">
+                                                                    <svg class="w-4 h-4 text-[#003554] pointer-events-none" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16"></path></svg>
+                                                                </button>
+                                                            </div>
+                                                        </div>
+                                                    </div>
+                                                    <div class="card-back absolute w-full h-full bg-linear-to-b from-[#003554] to-[#002a42] rounded-3xl p-6 shadow-lg flex flex-col justify-center items-center" style="backface-visibility: hidden; transform: rotateY(180deg);">
+                                                        <p class="card-answer text-white text-xl font-bold text-center mb-4">${escapeHtml(cardData.backText || '')}</p>
+                                                        <p class="text-white text-sm text-center opacity-75">Clique novamente para voltar</p>
+                                                    </div>
+                                                </div>`;
+
+                                        const grid = document.getElementById('cards-grid');
+                                        if (grid) grid.prepend(cardEl);
+
+                                        // Close modal and reset form
+                                        modalAddCard.classList.add('hidden');
+                                        formAddCard.reset();
+
+                                } catch (err) {
+                                        alert('Erro ao criar carta: ' + (err.message || err));
+                                } finally {
+                                        if (submitBtn) {
+                                                submitBtn.disabled = false;
+                                                submitBtn.innerHTML = originalBtnText || 'Criar Carta';
+                                        }
+                                }
+                        });
+
+                        // Small helper to escape HTML when inserting user-provided text
+                        function escapeHtml(str) {
+                                return String(str)
+                                        .replace(/&/g, '&amp;')
+                                        .replace(/</g, '&lt;')
+                                        .replace(/>/g, '&gt;')
+                                        .replace(/"/g, '&quot;')
+                                        .replace(/'/g, '&#39;');
+                        }
 
             // Modal Gerar Cards a partir de Arquivo (PDF)
             const modalGenerateFile = document.getElementById('modal-generate-from-file');

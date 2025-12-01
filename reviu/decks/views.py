@@ -1,9 +1,22 @@
 from django.shortcuts import render, redirect
+from django.http import JsonResponse
 import requests
 from datetime import datetime, timedelta, date
 import json
 
 # Create your views here.
+
+
+def _safe_json(response):
+    """Safely parse JSON from a requests.Response, returning {} on empty body or parse error."""
+    if response is None:
+        return {}
+    try:
+        if response.status_code == 204 or not response.content:
+            return {}
+        return response.json()
+    except ValueError:
+        return {}
 
 def decks_view(request):
     if request.session.get('auth_token') == None:
@@ -15,9 +28,8 @@ def decks_view(request):
 
     try:
         response = requests.get('http://localhost:8080/decks',headers=headers)
-        response.raise_for_status() 
-        dados_api = response.json()
-        
+        response.raise_for_status()
+        dados_api = _safe_json(response)
     except requests.exceptions.RequestException as e:
         print(f"Erro ao buscar decks da API: {e}")
         dados_api = {'decks': []}
@@ -26,15 +38,16 @@ def decks_view(request):
     current_deck_id = request.POST.get("current_deck_id")
     current_deck_name = ""
 
-    for i in dados_api:
-        deck = {
-            "id": i.get("id"),
-            "name": i.get("name")
-        }
-        if request.POST.get("current_deck_id") is not None:
-            if i.get("id") == int(request.POST.get("current_deck_id")):
-                current_deck_name = i.get("name")
-        decks.append(deck)
+    if dados_api != {'decks': []}:
+        for i in dados_api:
+            deck = {
+                "id": i.get("id"),
+                "name": i.get("name")
+            }
+            if request.POST.get("current_deck_id") is not None:
+                if i.get("id") == int(request.POST.get("current_deck_id")):
+                    current_deck_name = i.get("name")
+            decks.append(deck)
         
     
     if request.method == "POST":
@@ -43,7 +56,7 @@ def decks_view(request):
         try:
             response = requests.get('http://localhost:8080/decks/'+current_deck_id+'/cards',headers=headers)
             response.raise_for_status()
-            dados_api = response.json()
+            dados_api = _safe_json(response)
 
         except requests.exceptions.RequestException as e:
             print(f"Erro ao buscar decks da API: {e}")
@@ -96,7 +109,7 @@ def criar_deck(request):
     try:
         response = requests.post("http://localhost:8080/decks",headers=headers,json=data)
         response.raise_for_status()
-        dados_api = response.json()
+        dados_api = _safe_json(response)
 
     except requests.exceptions.RequestException as e:
         print(f"Erro ao buscar decks da API: {e}")
@@ -118,7 +131,7 @@ def deletar_deck(request,deck_id):
     try:
         response = requests.delete(url,headers=headers)
         response.raise_for_status()
-        dados_api = response.json()
+        dados_api = _safe_json(response)
 
     except requests.exceptions.RequestException as e:
         print(f"Erro ao buscar decks da API: {e}")
@@ -136,22 +149,44 @@ def criar_card(request, deck_id):
     headers={
         "Authorization":request.session.get('auth_token')
     }
-
+    # Build payload from POST values. If files are used, the external API
+    # should accept multipart; this view forwards JSON when non-file.
     data = {
         "frontText": request.POST.get("frontText"),
         "backText": request.POST.get("backText"),
     }
 
     try:
-        response = requests.post(url,headers=headers,json=data)
-        response.raise_for_status()
-        dados_api = response.json()
+        # If files are present, forward them as multipart/form-data
+        if request.FILES and len(request.FILES) > 0:
+            files = {}
+            # forward any file fields that the template might send
+            for name, f in request.FILES.items():
+                files[name] = (f.name, f.read(), getattr(f, 'content_type', 'application/octet-stream'))
+            resp = requests.post(url, headers=headers, files=files, data=data)
+        else:
+            resp = requests.post(url, headers=headers, json=data)
+
+        resp.raise_for_status()
+        created = _safe_json(resp)
 
     except requests.exceptions.RequestException as e:
-        print(f"Erro ao buscar decks da API: {e}")
-        dados_api = {'cards': []}
+        print(f"Erro ao criar card na API: {e}")
+        # If AJAX, return JSON error so front-end can show it
+        if request.headers.get('x-requested-with') == 'XMLHttpRequest':
+            return JsonResponse({'error': 'api_error', 'message': str(e)}, status=500)
+        return redirect('decks')
 
-    return redirect("decks")
+    # If AJAX request, return created card JSON so client can insert it in DOM
+    if request.headers.get('x-requested-with') == 'XMLHttpRequest':
+        # resp.status_code may be 201 or 200; return that status where possible
+        try:
+            status = resp.status_code
+        except Exception:
+            status = 200
+        return JsonResponse(created, safe=False, status=status)
+
+    return redirect('decks')
 
 
 def alterar_card(request, deck_id, card_id):
@@ -163,26 +198,45 @@ def alterar_card(request, deck_id, card_id):
     headers={
         "Authorization":request.session.get('auth_token')
     }
-
+    # Build payload from POST values. If files are used, forward as multipart.
     data = {
         "frontText": request.POST.get("frontText"),
         "backText": request.POST.get("backText")
     }
 
     try:
-        response = requests.put(url,headers=headers,json=data)
-        response.raise_for_status()
-        dados_api = response.json()
+        if request.FILES and len(request.FILES) > 0:
+            files = {}
+            for name, f in request.FILES.items():
+                files[name] = (f.name, f.read(), getattr(f, 'content_type', 'application/octet-stream'))
+            resp = requests.put(url, headers=headers, files=files, data=data)
+        else:
+            resp = requests.put(url, headers=headers, json=data)
+
+        resp.raise_for_status()
+        updated = _safe_json(resp)
 
     except requests.exceptions.RequestException as e:
-        print(f"Erro ao buscar decks da API: {e}")
-        dados_api = {'cards': []}
+        print(f"Erro ao alterar card na API: {e}")
+        if request.headers.get('x-requested-with') == 'XMLHttpRequest':
+            return JsonResponse({'error': 'api_error', 'message': str(e)}, status=500)
+        return redirect('decks')
 
-    return redirect("decks")
+    if request.headers.get('x-requested-with') == 'XMLHttpRequest':
+        try:
+            status = resp.status_code
+        except Exception:
+            status = 200
+        return JsonResponse(updated, safe=False, status=status)
+
+    return redirect('decks')
 
 
 def deletar_card(request, deck_id, card_id):
     if request.session.get('auth_token') == None:
+        # If AJAX request, return JSON error so front-end can handle it
+        if request.headers.get('x-requested-with') == 'XMLHttpRequest':
+            return JsonResponse({'error': 'not_authenticated'}, status=401)
         return redirect('login')
     
     url = "http://localhost:8080/decks/"+str(deck_id)+"/cards/"+str(card_id)
@@ -194,12 +248,19 @@ def deletar_card(request, deck_id, card_id):
     try:
         response = requests.delete(url,headers=headers)
         response.raise_for_status()
-        dados_api = response.json()
+        dados_api = _safe_json(response)
 
     except requests.exceptions.RequestException as e:
         print(f"Erro ao buscar decks da API: {e}")
         dados_api = {'cards': []}
+        # If AJAX, return JSON error so front-end can show an error
+        if request.headers.get('x-requested-with') == 'XMLHttpRequest':
+            return JsonResponse({'error': 'api_error', 'message': str(e)}, status=500)
         
+    # If this is an AJAX request, return a minimal JSON success response
+    if request.headers.get('x-requested-with') == 'XMLHttpRequest':
+        return JsonResponse({'ok': True})
+    
     return redirect("decks")
 
 
@@ -236,7 +297,7 @@ def gerar_cards_from_file(request, deck_id):
     try:
         resp = requests.post(gen_url, headers=headers, files=files, data=data, timeout=120)
         resp.raise_for_status()
-        gen_result = resp.json()
+        gen_result = _safe_json(resp)
     except requests.exceptions.RequestException as e:
         print(f"Erro ao enviar arquivo para gerar cards: {e}")
         return redirect('decks')
@@ -297,7 +358,7 @@ def card_review(request, deck_id):
         try:
             resp = requests.get(due_url, headers=headers, timeout=10)
             resp.raise_for_status()
-            cards_api = resp.json() or []
+            cards_api = _safe_json(resp) or []
         except requests.exceptions.RequestException as e:
             print(f"Erro ao buscar cards pendentes da API: {e}")
             cards_api = []
