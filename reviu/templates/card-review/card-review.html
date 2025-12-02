@@ -53,33 +53,28 @@
             {% csrf_token %}
             <input type="hidden" name="card_id" value="{{ card.id }}" />
             <input type="hidden" name="deck_id" value="{{ deck_id }}" />
-            <button 
-                onclick="rateCard('errei')"
-            
+            <button type="button"
+                onclick="rateCard(5)"
                 class="px-6 py-4 bg-red-600 text-white font-bold rounded-xl hover:bg-red-700 transition-colors">
                 <div class="text-xs mb-1">Errei</div>
             </button>
-            <button 
-                onclick="rateCard('dificil')"
-            
+            <button type="button"
+                onclick="rateCard(4)"
                 class="px-6 py-4 bg-orange-500 text-white font-bold rounded-xl hover:bg-orange-600 transition-colors">
                 <div class="text-xs mb-1">Difícil</div>
             </button>
-            <button 
-                onclick="rateCard('normal')"
-            
+            <button type="button"
+                onclick="rateCard(3)"
                 class="px-6 py-4 bg-yellow-400 text-[#003554] font-bold rounded-xl hover:bg-yellow-500 transition-colors">
                 <div class="text-xs mb-1">Normal</div>
             </button>
-            <button 
-                onclick="rateCard('facil')"
-            
+            <button type="button"
+                onclick="rateCard(2)"
                 class="px-6 py-4 bg-green-600 text-white font-bold rounded-xl hover:bg-green-700 transition-colors">
                 <div class="text-xs mb-1">Fácil</div>
             </button>
-            <button 
-                onclick="rateCard('muito_facil')"
-            
+            <button type="button"
+                onclick="rateCard(1)"
                 class="px-6 py-4 bg-blue-600 text-white font-bold rounded-xl hover:bg-blue-700 transition-colors">
                 <div class="text-xs mb-1">Muito fácil</div>
             </button>
@@ -98,31 +93,76 @@
     const ratingButtons = document.getElementById('rating-buttons');
     let isFlipped = false;
 
+    // URL do endpoint de review (view `card_review`)
+    const reviewUrl = "{% url 'card_review' deck_id=deck_id %}";
+
     // Flip ao clicar no card
-    reviewCard.addEventListener('click', function() {
-        if (!isFlipped) {
-            reviewCard.style.transform = 'rotateY(180deg)';
-            isFlipped = true;
-            ratingButtons.classList.remove('hidden');
-        } else {
-            reviewCard.style.transform = 'rotateY(0deg)';
+    if (reviewCard) {
+      reviewCard.addEventListener('click', function() {
+          if (!isFlipped) {
+              reviewCard.style.transform = 'rotateY(180deg)';
+              isFlipped = true;
+              ratingButtons.classList.remove('hidden');
+          } else {
+              reviewCard.style.transform = 'rotateY(0deg)';
+              isFlipped = false;
+              ratingButtons.classList.add('hidden');
+          }
+      });
+    }
+
+    async function rateCard(rating) {
+        try {
+            console.log('Card avaliado como:', rating);
+            const form = document.querySelector('#rating-buttons form');
+            if (!form) return;
+
+            const csrfInput = form.querySelector('input[name="csrfmiddlewaretoken"]');
+            const csrf = csrfInput ? csrfInput.value : '';
+            const cardIdInput = form.querySelector('input[name="card_id"]');
+            const cardId = cardIdInput ? cardIdInput.value : '';
+            const deckIdInput = form.querySelector('input[name="deck_id"]');
+            const deckId = deckIdInput ? deckIdInput.value : '';
+
+            // Disable buttons to avoid double submissions
+            const btns = Array.from(form.querySelectorAll('button'));
+            btns.forEach(b => b.disabled = true);
+
+            const body = new URLSearchParams();
+            body.append('card_id', cardId);
+            // enviar 'quality' conforme formato aceito pelo endpoint
+            body.append('quality', rating);
+            body.append('deck_id', deckId);
+
+            const res = await fetch(reviewUrl, {
+                method: 'POST',
+                headers: {
+                    'X-Requested-With': 'XMLHttpRequest',
+                    'X-CSRFToken': csrf,
+                    'Content-Type': 'application/x-www-form-urlencoded'
+                },
+                body: body.toString(),
+                credentials: 'same-origin'
+            });
+
+            if (!res.ok && res.status !== 302 && res.status !== 0) {
+                throw new Error('Resposta não OK: ' + res.status);
+            }
+
+            // Após enviar o review, recarregar a página para buscar o próximo card
+            window.location.reload();
+
+        } catch (err) {
+            console.error('Erro ao enviar avaliação', err);
+            const form = document.querySelector('#rating-buttons form');
+            if (form) Array.from(form.querySelectorAll('button')).forEach(b => b.disabled = false);
+            alert('Erro ao enviar avaliação. Tente novamente.');
+        } finally {
+            // reset visual local (a reload geralmente irá atualizar tudo de qualquer forma)
+            if (reviewCard) reviewCard.style.transform = 'rotateY(0deg)';
             isFlipped = false;
             ratingButtons.classList.add('hidden');
         }
-    });
-
-    function rateCard(rating) {
-        console.log('Card avaliado como:', rating);
-        // Aqui você pode adicionar lógica para enviar a avaliação ao backend
-        // e carregar o próximo card
-
-        // Reset do card para o próximo
-        reviewCard.style.transform = 'rotateY(0deg)';
-        isFlipped = false;
-        ratingButtons.classList.add('hidden');
-
-        // Exemplo: recarregar próximo card
-        // window.location.reload();
     }
 
     (function(){

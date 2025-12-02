@@ -389,11 +389,16 @@ def card_review(request, deck_id):
     try:
         if request.method == 'POST':
             card_id = request.POST.get('card_id')
-            evaluation = request.POST.get('evaluation') or request.POST.get('rating')
+            # Preferir 'quality' conforme novo contrato; fallback para 'evaluation'/'rating'
+            quality = request.POST.get('quality') or request.POST.get('evaluation') or request.POST.get('rating')
 
             payload = {}
-            if evaluation is not None:
-                payload['evaluation'] = evaluation
+            if quality is not None:
+                # tentar converter para int quando possível
+                try:
+                    payload['quality'] = int(quality)
+                except Exception:
+                    payload['quality'] = quality
 
             review_url = f"{API_BASE}/decks/{deck_id}/cards/{card_id}/review"
             try:

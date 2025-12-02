@@ -5,26 +5,39 @@
 
 {% block body %}
 <div class="h-screen flex">
-    <div class="absolute right-0 top-0 pointer-events-none z-0">
+    <div class="size-50 md:size-max absolute right-0 top-0 pointer-events-none z-0">
         <img src="{% static 'resouces/decko.svg' %}" alt="">
     </div>
     <main class="w-full md:ml-8 flex flex-col">
-        <div class="flex flex-col grow max-h-168">
+        <div class=" p-8 flex flex-col grow max-h-168">
 
-            <div class="mt-8 mb-18 sm:mb-24 flex-none">
-                <p class="text-lg sm:text-3xl ml-3 text-[#013756]">Bem Vindo,</p>
-                <p class="text-lg sm:text-3xl ml-3 text-[#013756] font-bold">{{username}}</p>
+            <div class="mb-8 sm:mb-24 flex-none">
+                <p class="text-xl sm:text-3xl ml-3 text-[#013756]">Bem Vindo,</p>
+                <p class="text-2xl sm:text-3xl ml-3 text-[#013756] font-bold">{{username}}</p>
             </div>
 
             <div class="mb-2 sm:mb-4 flex-none">
-                <p class="text-lg sm:text-2xl ml-3 text-[#013756]">{{ cards_a_revisar }} cartas para revisar</p>
+                <p class="text-xl sm:text-2xl ml-3 text-[#013756]">{{ cards_a_revisar }} cartas para revisar</p>
             </div>
 
-            <div id="card-select" class="w-full grow px-3 mb-3 flex gap-3 overflow-x-scroll snap-x not-md:scrollbar-hidden">
+            <div id="card-select" class="flex w-screen md:w-full px-8 md:px-0 -mx-8 md:mx-0 gap-6.5 overflow-x-auto scrollbar-hidden flex-nowrap pb-4 md:overflow-visible md:grid md:gap-6 md:justify-start md:justify-items-stretch" style="--card-max-width:260px; grid-template-columns: repeat(auto-fit, minmax(0, var(--card-max-width)));">
+                <a href="{% url 'decks' %}">
+                    <div id="btn-add-card" class="shrink-0 min-w-[260px] md:w-auto border-4 border-dashed border-gray-400 rounded-3xl p-6 shadow-lg h-98 aspect-2/3 flex items-center justify-center cursor-pointer hover:border-gray-500 transition-colors snap-start">
+                        <div class="text-center">
+                            <div class="w-16 h-16 mx-auto mb-2 rounded-full bg-gray-400 flex items-center justify-center">
+                                <svg class="w-8 h-8 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4v16m8-8H4"></path>
+                                </svg>
+                            </div>
+                            <p class="text-gray-600 font-semibold">Nova Carta</p>
+                        </div>
+                    </div>
+                </a>
+
                 {% for deck in decks %}
                     <form id="form-start-review" method="post" action="{% url 'card_review' deck_id=deck.id|add:'0' %}">
                         {% csrf_token %}
-                        <button type="submit" name="deck_id" value="{{ deck.id }}" id="card" class="h-full aspect-2/3 bg-linear-to-b from-[#FE9A09] to-[#FF8000] rounded-3xl p-6 flex flex-col justify-between snap-center">
+                        <button type="submit" name="deck_id" value="{{ deck.id }}" id="card" class="shrink-0 min-w-[260px] md:w-auto h-full aspect-2/3 bg-linear-to-b from-[#FE9A09] to-[#FF8000] rounded-3xl p-6 flex flex-col justify-between snap-start">
                             <div class="flex justify-between gap-3">
                                 <p class="text-lg sm:text-2xl text-[#013756] font-bold">{{ deck.name }}</p>
                                 <div class="flex items-center">
@@ -39,18 +52,7 @@
                 {% endfor %}
 
 
-                <a href="{% url 'decks' %}">
-                    <div id="btn-add-card" class="border-4 border-dashed border-gray-400 rounded-3xl p-6 shadow-lg h-98 aspect-2/3 flex items-center justify-center cursor-pointer hover:border-gray-500 transition-colors">
-                        <div class="text-center">
-                            <div class="w-16 h-16 mx-auto mb-2 rounded-full bg-gray-400 flex items-center justify-center">
-                                <svg class="w-8 h-8 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4v16m8-8H4"></path>
-                                </svg>
-                            </div>
-                            <p class="text-gray-600 font-semibold">Nova Carta</p>
-                        </div>
-                    </div>
-                </a>
+                
             </div>
         </div>
 
