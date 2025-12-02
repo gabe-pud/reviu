@@ -58,6 +58,12 @@ _______________________________________________________
 _______________________________________________________
 # 🔐 Variaveis de Ambiente
 
+### 📥 1. Clone o repositório
+```bash
+git clone https://github.com/gabe-pud/reviu
+```
+### ⚙ 2. Configure as variáveis de ambiente  
+
 ## Para rodar o projeto, crie um arquivo chamado .env na pasta principal e configure as variáveis essenciais:
 
 ### ENVIRONMENT
@@ -79,6 +85,8 @@ _______________________________________________________
 - print(get_random_secret_key())
 
 - Copie a chave gerada para o arquivo .env. 
+
+---
 
 # 🏅 Créditos
 
