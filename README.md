@@ -21,39 +21,28 @@ SQLite
 
 
 🔐 Variáveis de Ambiente
-Crie um arquivo .env na pasta base do projeto e adicione estas variáveis:
 
-ENVIRONMENT
+- ENVIRONMENT
+    - para execução local deve definido como "development", em produção deve ser alterado para qulaquer outro valor.
 
-Para execução local:
+- SECRET_KEY
 
-ENVIRONMENT=development
+    para gerar uma secret key do djnago:
 
+    - no terminal navegue até a pasta em que o arquivo "manage.py" se encontra
+    - execute:
+        
+        python manage.py shell
+        
 
-Em produção deve ser qualquer outro valor:
+    - e após o shell ser iniciado utilize esta sequencia
+        
+        from django.core.management.utils import get_random_secret_key
+        print(get_random_secret_key())
+        
+    - ao rodar a ultima linha será exibido no console a chave que pode ser copiada para .env
 
-ENVIRONMENT=production
-
-SECRET_KEY
-
-Para gerar uma secret key do Django:
-
-No terminal, navegue até a pasta onde o arquivo manage.py se encontra
-
-Execute:
-
-python manage.py shell
-
-
-Após o shell iniciar, execute:
-
-from django.core.management.utils import get_random_secret_key
-print(get_random_secret_key())
-
-
-Copie a chave exibida e cole no .env:
-
-SECRET_KEY=sua_chave_gerada
+    - para sair do shell apenas pressione *ctrl+z* e depois *enter*
 
 
 Para sair do shell pressione Ctrl + Z e depois Enter
@@ -72,4 +61,4 @@ python manage.py runserver
 http://127.0.0.1:8000/
 
 
-└── README.md
+
