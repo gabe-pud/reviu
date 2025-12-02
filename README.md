@@ -5,10 +5,15 @@ O Reviu é uma aplicação web desenvolvida para facilitar o estudo por meio de 
 ✨ Funcionalidades
 
 📚 Criação de decks: organize seus estudos de forma prática.
+
 📝 Criação e edição de cartas: adicione perguntas e respostas personalizadas.
+
 📄 Geração de cartas a partir de PDFs: transforme conteúdos em flashcards rapidamente.
+
 🔐 Autenticação de usuário: login e cadastro seguro.
+
 🔁 Revisão de cartas pendentes: revise apenas o que ainda precisa reforçar.
+
 🎨 Interface moderna: design clean e responsivo com Tailwind CSS.
 
 🛠 Tecnologias Utilizadas
