@@ -18,6 +18,7 @@ O Reviu é uma aplicação web desenvolvida para facilitar o estudo por meio de 
 
 
 🛠 *TECNOLOGIAS UTILIZADAS*
+
 💻 Back-End (API & Lógica)
 
 Java com Spring Boot – API REST, lógica de negócios e injeção de dependências.
@@ -35,14 +36,21 @@ Ferramentas de gerenciamento: pgAdmin / DBeaver.
 🌐 *FRONT-END / INTERFACE WEB*
 
 Django – renderização de páginas dinâmicas e roteamento.
+
 Tailwind CSS – estilização utility-first para uma interface moderna.
+
 PyPDF2 – extração e processamento de PDFs para gerar cartas automaticamente.
+
 
 🛠 *FERRAMENTAS DE DESENVOLVIMENTO*
 Figma – prototipagem das telas.
+
 Postman – documentação e testes das APIs.
+
 IntelliJ IDEA – desenvolvimento Back-End.
+
 VS Code – desenvolvimento Front-End.
+
 Git/GitHub – controle de versão e colaboração.
 
 🔐 *VARIAVEIS DE AMBIENTE*
