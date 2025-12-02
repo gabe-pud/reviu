@@ -61,6 +61,7 @@ def decks_view(request):
     decks = []
     current_deck_id = request.POST.get("current_deck_id")
     current_deck_name = ""
+    cards_a_revisar = 0
 
     if dados_api != {'decks': []}:
         for i in dados_api:
@@ -76,6 +77,7 @@ def decks_view(request):
     
     if request.method == "POST":
         hoje = date.today()
+        cards_a_revisar = 0
 
         try:
             response = requests.get('http://localhost:8080/decks/'+current_deck_id+'/cards',headers=headers)
@@ -90,6 +92,10 @@ def decks_view(request):
 
         for i in dados_api:
             formatted_next = _format_next_review(i.get("nextReview"), hoje)
+
+            # Count cards that are due today or earlier for the selected deck
+            if formatted_next == 'hoje':
+                cards_a_revisar += 1
 
             card = {
                 "id": i.get("id"),
@@ -107,7 +113,8 @@ def decks_view(request):
         "decks":decks,
         "current_deck_id": current_deck_id,
         "current_deck_name": current_deck_name,
-        "cards":cards
+        "cards":cards,
+        "cards_a_revisar": cards_a_revisar
     }
     return render(request, 'decks/deck.html', context)
 

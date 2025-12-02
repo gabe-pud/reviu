@@ -67,7 +67,7 @@
         <div class="p-8 h-full overflow-scroll scrollbar-hidden md:p-12">
             <div class="mb-3">
                 <h1 class="text-[#003554] text-2xl w-1/2 md:w-max md:text-4xl font-bold mb-4">{{current_deck_name}}</h1>
-                <p class="text-[#003554] text-xl w-1/2 md:w-max">0 cartas para revisar hoje</p>
+                <p class="text-[#003554] text-xl w-1/2 md:w-max"><span id="cards-a-revisar">{{ cards_a_revisar|default:0 }}</span> cartas para revisar hoje</p>
                 {% if current_deck_id %}
                 <!-- Deck actions: show inline on md+, on mobile use floating hamburger that toggles a bottom-left panel -->
                 <div id="deck-actions" class="mt-4">
@@ -859,6 +859,19 @@
                             // Fallback to prepend if structure is unexpected
                             grid.prepend(cardEl);
                         }
+                    }
+
+                    // If the new card is due today according to the API/local fallback,
+                    // increment the visible counter so the user sees it update immediately.
+                    try {
+                        const counterEl = document.getElementById('cards-a-revisar');
+                        if (counterEl && cardData.nextReview && cardData.nextReview.toString().toLowerCase() === 'hoje') {
+                            const current = parseInt(counterEl.textContent.replace(/\D/g, '')) || 0;
+                            counterEl.textContent = current + 1;
+                        }
+                    } catch (e) {
+                        // don't block UI on errors
+                        console.warn('Could not update cards_a_revisar counter:', e);
                     }
 
                     // Close modal and reset form

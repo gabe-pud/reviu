@@ -49,38 +49,39 @@
       {% endif %}
       <!-- Botões de Avaliação Embaixo -->
       <div id="rating-buttons" class="hidden">
-        <form method="post" class="w-full max-w-2xl grid grid-cols-5 gap-4 mb-8 z-40">
+        <form method="post" class="w-full max-w-2xl grid grid-cols-5 gap-2 md:gap-4 mb-8 z-40">
             {% csrf_token %}
             <input type="hidden" name="card_id" value="{{ card.id }}" />
             <input type="hidden" name="deck_id" value="{{ deck_id }}" />
             <button type="button"
                 onclick="rateCard(5)"
-                class="px-6 py-4 bg-red-600 text-white font-bold rounded-xl hover:bg-red-700 transition-colors">
+                class="px-2 py-2 md:px-6 md:py-4 bg-red-600 text-white font-bold rounded-xl hover:bg-red-700 transition-colors">
                 <div class="text-xs mb-1">Errei</div>
             </button>
             <button type="button"
                 onclick="rateCard(4)"
-                class="px-6 py-4 bg-orange-500 text-white font-bold rounded-xl hover:bg-orange-600 transition-colors">
+                class="px-2 py-2 md:px-6 md:py-4 bg-orange-500 text-white font-bold rounded-xl hover:bg-orange-600 transition-colors">
                 <div class="text-xs mb-1">Difícil</div>
             </button>
             <button type="button"
                 onclick="rateCard(3)"
-                class="px-6 py-4 bg-yellow-400 text-[#003554] font-bold rounded-xl hover:bg-yellow-500 transition-colors">
+                class="px-2 py-2 md:px-6 md:py-4 bg-yellow-400 text-[#003554] font-bold rounded-xl hover:bg-yellow-500 transition-colors">
                 <div class="text-xs mb-1">Normal</div>
             </button>
             <button type="button"
                 onclick="rateCard(2)"
-                class="px-6 py-4 bg-green-600 text-white font-bold rounded-xl hover:bg-green-700 transition-colors">
+                class="px-2 py-2 md:px-6 md:py-4 bg-green-600 text-white font-bold rounded-xl hover:bg-green-700 transition-colors">
                 <div class="text-xs mb-1">Fácil</div>
             </button>
             <button type="button"
                 onclick="rateCard(1)"
-                class="px-6 py-4 bg-blue-600 text-white font-bold rounded-xl hover:bg-blue-700 transition-colors">
+                class="px-2 py-2 md:px-6 md:py-4 bg-blue-600 text-white font-bold rounded-xl hover:bg-blue-700 transition-colors">
                 <div class="text-xs mb-1">Muito fácil</div>
             </button>
         </form>
       </div>
       
+      <div class="h-16 md:h-0"></div>
       <!-- Botão Voltar para o Deck removido do rodapé -->
       
   </div>
