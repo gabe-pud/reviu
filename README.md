@@ -65,28 +65,29 @@ git clone https://github.com/gabe-pud/reviu
 ```
 ### ⚙ 2. Configure as variáveis de ambiente  
 
-## Para rodar o projeto, crie um arquivo chamado .env na pasta principal e configure as variáveis essenciais:
+crie um arquivo ".env" na pasta base do projeto e adicione estas variáveis:
 
-### ENVIRONMENT
-- para execução local deve definido como "development", em produção deve ser alterado para qulaquer outro valor.
+- ENVIRONMENT
+    - para execução local deve definido como "development", em produção deve ser alterado para qulaquer outro valor.
 
-- Isso permite que o sistema identifique onde está rodando. 🚀
+- SECRET_KEY
 
-### SECRET_KEY
+    para gerar uma secret key do djnago:
 
-- Chave de segurança do Django.
+    - no terminal navegue até a pasta em que o arquivo "manage.py" se encontra
+    - execute:
+        ```
+        python manage.py shell
+        ```
 
-- Para gerar, execute no terminal (na pasta do manage.py):
+    - e após o shell ser iniciado utilize esta sequencia
+        ```
+        from django.core.management.utils import get_random_secret_key
+        print(get_random_secret_key())
+        ```
+    - ao rodar a ultima linha será exibido no console a chave que pode ser copiada para .env
 
-- python manage.py shell
-
-- No shell do Django, digite:
-
-- from django.core.management.utils import get_random_secret_key
-- print(get_random_secret_key())
-
-- Copie a chave gerada para o arquivo .env. 
-
+    - para sair do shell apenas pressione **ctrl+z** e depois **enter**
 ---
 
 # 🏅 Créditos
