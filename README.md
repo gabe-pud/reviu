@@ -1,64 +1,81 @@
 📘 Reviu — Sistema de Flashcards
 
-O Reviu é uma aplicação web desenvolvida para facilitar o estudo por meio de flashcards organizados em decks.
-Você cria seus decks, adiciona perguntas e respostas, revisa conteúdos pendentes e ainda pode gerar cartas automaticamente a partir de arquivos PDF.
-O sistema também conta com login e cadastro para salvar todo o seu progresso.
+O Reviu é uma aplicação web desenvolvida para facilitar o estudo por meio de flashcards organizados em decks. Com ele, você pode criar seus próprios decks, adicionar perguntas e respostas, revisar conteúdos pendentes e até gerar cartas automaticamente a partir de arquivos PDF. Todo o seu progresso é salvo com segurança graças ao sistema de login e cadastro.
 
 ✨ Funcionalidades
 
-📚 Criação de decks
-📝 Criação e edição de cartas
-📄 Geração de cartas a partir de PDFs
-🔐 Autenticação de usuário (login e cadastro)
-🔁 Revisão de cartas pendentes
-🎨 Interface moderna utilizando TailwindCSS
+📚 Criação de decks: organize seus estudos de forma prática.
 
-🔧 Tecnologias Utilizadas
-Python (Django)
-HTML + TailwindCSS
-Django Templates
-SQLite
+📝 Criação e edição de cartas: adicione perguntas e respostas personalizadas.
 
+📄 Geração de cartas a partir de PDFs: transforme conteúdos em flashcards rapidamente.
+
+🔐 Autenticação de usuário: login e cadastro seguro.
+
+🔁 Revisão de cartas pendentes: revise apenas o que ainda precisa reforçar.
+
+🎨 Interface moderna: design clean e responsivo com Tailwind CSS.
+
+🛠 Tecnologias Utilizadas
+💻 Back-End (API & Lógica)
+
+Java com Spring Boot – API REST, lógica de negócios e injeção de dependências.
+
+Spring Data JPA – persistência de dados.
+
+Spring Security – autenticação e autorização de usuários.
+
+🗄 Banco de Dados
+
+PostgreSQL – armazenamento seguro e confiável.
+
+Ferramentas de gerenciamento: pgAdmin / DBeaver.
+
+🌐 Front-End / Interface Web
+
+Django – renderização de páginas dinâmicas e roteamento.
+
+Tailwind CSS – estilização utility-first para uma interface moderna.
+
+PyPDF2 – extração e processamento de PDFs para gerar cartas automaticamente.
+
+🛠 Ferramentas de Desenvolvimento
+
+Figma – prototipagem das telas.
+
+Postman – documentação e testes das APIs.
+
+IntelliJ IDEA – desenvolvimento Back-End.
+
+VS Code – desenvolvimento Front-End.
+
+Git/GitHub – controle de versão e colaboração.
 
 🔐 Variáveis de Ambiente
 
-- ENVIRONMENT
-    - para execução local deve definido como "development", em produção deve ser alterado para qulaquer outro valor.
+Para rodar o projeto, crie um arquivo chamado .env na pasta principal e configure as variáveis essenciais:
 
-- SECRET_KEY
+ENVIRONMENT
 
-    para gerar uma secret key do djnago:
+"development" para desenvolvimento local.
 
-    - no terminal navegue até a pasta em que o arquivo "manage.py" se encontra
-    - execute:
-        
-        python manage.py shell
-        
+Outro valor para produção.
 
-    - e após o shell ser iniciado utilize esta sequencia
-        
-        from django.core.management.utils import get_random_secret_key
-        print(get_random_secret_key())
-        
-    - ao rodar a ultima linha será exibido no console a chave que pode ser copiada para .env
+Isso permite que o sistema identifique onde está rodando. 🚀
 
-    - para sair do shell apenas pressione *ctrl+z* e depois *enter*
+SECRET_KEY
+
+Chave de segurança do Django.
+
+Para gerar, execute no terminal (na pasta do manage.py):
+
+python manage.py shell
 
 
-Para sair do shell pressione Ctrl + Z e depois Enter
+No shell do Django, digite:
 
-▶️ Como Rodar o Projeto
-1. Instale as dependências
-pip install -r requirements.txt
-
-2. Aplique as migrações
-python manage.py migrate
-
-3. Rode o servidor
-python manage.py runserver
-
-4. Acesse no navegador:
-http://127.0.0.1:8000/
+from django.core.management.utils import get_random_secret_key
+print(get_random_secret_key())
 
 
-
+Copie a chave gerada para o arquivo .env. 
