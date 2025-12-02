@@ -20,7 +20,9 @@ O Reviu é uma aplicação web desenvolvida para facilitar o estudo por meio de 
 💻 Back-End (API & Lógica)
 
 Java com Spring Boot – API REST, lógica de negócios e injeção de dependências.
+
 Spring Data JPA – persistência de dados.
+
 Spring Security – autenticação e autorização de usuários.
 
 🗄 Banco de Dados
