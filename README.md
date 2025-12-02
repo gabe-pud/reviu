@@ -40,10 +40,7 @@ _______________________________________________________
 
 - Django – renderização de páginas dinâmicas e roteamento.
 
-- Tailwind CSS – estilização utility-first para uma interface moderna.
-
-- PyPDF2 – extração e processamento de PDFs para gerar cartas automaticamente.
-
+- Tailwind CSS – estilização para uma interface moderna.
 _______________________________________________________
 # 🛠 *Ferramentas de Desenvolvimento*
 - Figma – prototipagem das telas.
