@@ -3,6 +3,10 @@
 O Reviu é uma aplicação web desenvolvida para facilitar o estudo por meio de flashcards organizados em decks. Com ele, você pode criar seus próprios decks, adicionar perguntas e respostas, revisar conteúdos pendentes e até gerar cartas automaticamente a partir de arquivos PDF. Todo o seu progresso é salvo com segurança graças ao sistema de login e cadastro.
 
 ---
+### 📁 Repositorio Back-End
+```bash
+https://github.com/thialms/reviu-backend
+```
 
  ## ✨ Funcionabilidades
 
